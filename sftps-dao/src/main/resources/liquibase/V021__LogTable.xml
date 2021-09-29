@@ -1,0 +1,47 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
+    <changeSet author="Senior Cyber" id="">
+        <createTable tableName="tbl_log">
+            <column autoIncrement="true" name="log_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="event_type" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_display_name" type="VARCHAR(200)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="key_name" type="VARCHAR(200)"/>
+            <column name="size" type="BIGINT"/>
+            <column name="src_path" type="VARCHAR(255)"/>
+            <column name="dst_path" type="VARCHAR(255)"/>
+            <column name="created_at" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex indexName="" tableName="tbl_log">
+            <column name="created_at"/>
+        </createIndex>
+        <createIndex indexName="" tableName="tbl_log">
+            <column name="event_type"/>
+        </createIndex>
+        <createIndex indexName="" tableName="tbl_log">
+            <column name="key_name"/>
+        </createIndex>
+        <createIndex indexName="" tableName="tbl_log">
+            <column name="user_display_name"/>
+        </createIndex>
+        <createIndex indexName="" tableName="tbl_log">
+            <column name="size"/>
+        </createIndex>
+        <createIndex indexName="" tableName="tbl_log">
+            <column name="src_path"/>
+        </createIndex>
+        <createIndex indexName="" tableName="tbl_log">
+            <column name="dst_path"/>
+        </createIndex>
+
+    </changeSet>
+</databaseChangeLog>

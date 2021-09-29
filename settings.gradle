@@ -1,0 +1,10 @@
+rootProject.name = 'sftps-master'
+
+include(
+        ":sftps-dao",
+        ":sftps-web",
+        ":sftps-api"
+)
+project(":sftps-dao").projectDir = file("./sftps-dao")
+project(":sftps-web").projectDir = file("./sftps-web")
+project(":sftps-api").projectDir = file("./sftps-api")

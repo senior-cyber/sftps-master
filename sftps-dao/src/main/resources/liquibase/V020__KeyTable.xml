@@ -1,0 +1,36 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
+    <changeSet author="Senior Cyber" id="">
+        <createTable tableName="tbl_key">
+            <column autoIncrement="true" name="key_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(200)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="certificate" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="private_key" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="enabled" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_seen" type="DATETIME"/>
+        </createTable>
+        <createIndex indexName="" tableName="tbl_key">
+            <column name="last_seen"/>
+        </createIndex>
+        <createIndex indexName="" tableName="tbl_key">
+            <column name="enabled"/>
+        </createIndex>
+        <addUniqueConstraint columnNames="user_id,name" constraintName="" tableName="tbl_key"/>
+
+    </changeSet>
+</databaseChangeLog>

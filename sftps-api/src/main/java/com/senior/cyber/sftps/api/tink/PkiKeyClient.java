@@ -1,0 +1,72 @@
+package com.senior.cyber.sftps.api.tink;
+
+import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.KmsClient;
+import com.senior.cyber.frmk.common.pki.PublicKeyUtils;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.methods.RequestBuilder;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.util.EntityUtils;
+
+import java.io.Closeable;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
+import java.security.PublicKey;
+
+public class PkiKeyClient implements KmsClient, Closeable {
+
+    public static final String URI = "pki-kms://";
+
+    private static final String BASE = "https://192.168.1.8:5040/api/key";
+
+    private final String clientSecret;
+
+    private final CloseableHttpClient client = HttpClientBuilder.create().build();
+
+    private final Crypto crypto;
+
+    public PkiKeyClient(Crypto crypto, String clientSecret) {
+        this.crypto = crypto;
+        this.clientSecret = clientSecret;
+    }
+
+    @Override
+    public boolean doesSupport(String keyUri) {
+        return keyUri.startsWith(URI);
+    }
+
+    @Override
+    public KmsClient withCredentials(String credentialPath) throws GeneralSecurityException {
+        throw new UnsupportedOperationException("Not Implemented");
+    }
+
+    @Override
+    public KmsClient withDefaultCredentials() throws GeneralSecurityException {
+        throw new UnsupportedOperationException("Not Implemented");
+    }
+
+    @Override
+    public Aead getAead(String keyUri) throws GeneralSecurityException {
+
+        PublicKey serverPublicKey = null;
+        HttpUriRequest request = RequestBuilder.get(BASE + "/info").build();
+        try (CloseableHttpResponse response = this.client.execute(request)) {
+            serverPublicKey = PublicKeyUtils.read(EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            throw new GeneralSecurityException("server public key is required");
+        }
+
+        String clientId = keyUri.substring(URI.length());
+        String serviceUrl = BASE + "/" + clientId;
+        return new RemoteAead(this.crypto, this.client, serverPublicKey, serviceUrl, this.clientSecret);
+    }
+
+    @Override
+    public void close() throws IOException {
+        this.client.close();
+    }
+
+}

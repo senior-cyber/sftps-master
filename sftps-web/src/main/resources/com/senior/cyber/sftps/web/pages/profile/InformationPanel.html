@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+<wicket:panel>
+    <form wicket:id="form">
+        <div class="card-body">
+            <div wicket:id="row2">
+                <div wicket:id="displayNameColumn">
+                    <wicket:container wicket:id="displayNameContainer">
+                        <div class="form-group">
+                            <label wicket:for="displayNameField">Display Name</label>
+                            <input wicket:id="displayNameField" type="text" class="form-control">
+                            <span wicket:id="displayNameFeedback"/>
+                        </div>
+                    </wicket:container>
+                </div>
+                <div wicket:id="lastColumn"/>
+            </div>
+            <div wicket:id="row1">
+                <div wicket:id="emailAddressColumn">
+                    <wicket:container wicket:id="emailAddressContainer">
+                        <div class="form-group">
+                            <label wicket:for="emailAddressField">Email Address</label>
+                            <input wicket:id="emailAddressField" type="text" class="form-control">
+                            <span wicket:id="emailAddressFeedback"/>
+                        </div>
+                    </wicket:container>
+                </div>
+                <div wicket:id="loginColumn">
+                    <wicket:container wicket:id="loginContainer">
+                        <div class="form-group">
+                            <label wicket:for="loginField">Login</label>
+                            <input wicket:id="loginField" type="text" class="form-control">
+                            <span wicket:id="loginFeedback"/>
+                        </div>
+                    </wicket:container>
+                </div>
+                <div wicket:id="lastColumn"/>
+            </div>
+        </div>
+        <div class="card-footer">
+            <button wicket:id="okayButton" type="submit" class="btn btn-info">Okay</button>
+            <a wicket:id="cancelButton" class="btn btn-default float-right">Cancel</a>
+        </div>
+    </form>
+</wicket:panel>
+</body>
+</html>
