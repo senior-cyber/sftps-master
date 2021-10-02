@@ -1,19 +1,18 @@
 package com.senior.cyber.sftps.web.pages;
 
+import com.google.crypto.tink.*;
+import com.senior.cyber.frmk.common.base.AdminLTEResourceReference;
+import com.senior.cyber.frmk.common.base.Bookmark;
+import com.senior.cyber.frmk.common.base.WicketFactory;
+import com.senior.cyber.frmk.common.wicket.markup.html.panel.ComponentFeedbackPanel;
 import com.senior.cyber.sftps.dao.entity.Group;
 import com.senior.cyber.sftps.dao.entity.User;
 import com.senior.cyber.sftps.web.SecretUtils;
-import com.senior.cyber.sftps.web.configuration.ApplicationConfiguration;
 import com.senior.cyber.sftps.web.repository.GroupRepository;
 import com.senior.cyber.sftps.web.repository.UserRepository;
 import com.senior.cyber.sftps.web.tink.MasterAead;
 import com.senior.cyber.sftps.web.validator.UserEmailAddressValidator;
 import com.senior.cyber.sftps.web.validator.UserLoginValidator;
-import com.senior.cyber.frmk.common.base.AdminLTEResourceReference;
-import com.senior.cyber.frmk.common.base.Bookmark;
-import com.senior.cyber.frmk.common.base.WicketFactory;
-import com.senior.cyber.frmk.common.wicket.markup.html.panel.ComponentFeedbackPanel;
-import com.google.crypto.tink.*;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.wicket.WicketRuntimeException;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -33,7 +32,6 @@ import org.jasypt.util.password.PasswordEncryptor;
 import org.springframework.context.ApplicationContext;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
@@ -129,7 +127,6 @@ public class RegisterPage extends WebPage {
             UserRepository userRepository = context.getBean(UserRepository.class);
             GroupRepository groupRepository = context.getBean(GroupRepository.class);
             PasswordEncryptor passwordEncryptor = context.getBean(PasswordEncryptor.class);
-            ApplicationConfiguration configuration = context.getBean(ApplicationConfiguration.class);
 
             Optional<Group> optionalGroup = groupRepository.findByName("Registered");
             Group group = optionalGroup.orElseThrow(() -> new WicketRuntimeException(""));
@@ -160,7 +157,7 @@ public class RegisterPage extends WebPage {
             String secret = Base64.getEncoder().withoutPadding().encodeToString(aeadDek.encrypt(SecretUtils.generateSecret().getBytes(StandardCharsets.UTF_8), "".getBytes(StandardCharsets.UTF_8)));
             user.setSecret(secret);
 
-            user.setHomeDirectory(FilenameUtils.normalize(new File(configuration.getHomeDirectory(), UUID.randomUUID().toString()).getAbsolutePath(), true));
+            user.setHomeDirectory(FilenameUtils.normalize(UUID.randomUUID().toString(), true));
             userRepository.save(user);
 
             setResponsePage(LoginPage.class);

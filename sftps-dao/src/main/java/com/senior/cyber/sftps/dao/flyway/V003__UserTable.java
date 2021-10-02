@@ -2,12 +2,12 @@ package com.senior.cyber.sftps.dao.flyway;
 
 import com.senior.cyber.frmk.jdbc.query.InsertQuery;
 import com.senior.cyber.sftps.dao.LiquibaseMigration;
-import org.apache.commons.io.FileUtils;
 import org.jasypt.util.password.StrongPasswordEncryptor;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 public class V003__UserTable extends LiquibaseMigration {
 
@@ -32,7 +32,7 @@ public class V003__UserTable extends LiquibaseMigration {
         insertQuery.addValue("pwd = :pwd", passwordEncryptor.encryptPassword("admin"));
         insertQuery.addValue("email_address = :email_address", ADMIN_EMAIL);
         insertQuery.addValue("admin", false);
-        insertQuery.addValue("home_directory", FileUtils.getTempDirectoryPath());
+        insertQuery.addValue("home_directory", UUID.randomUUID().toString());
         insertQuery.addValue("last_seen = :last_seen", new Date());
         named.update(insertQuery.toSQL(), insertQuery.toParam());
     }
