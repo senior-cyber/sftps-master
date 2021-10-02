@@ -54,6 +54,17 @@ public class User implements Serializable {
     @Column(name = "webhook_secret")
     private String webhookSecret;
 
+    @Column(name = "encrypt_at_rest")
+    private boolean encryptAtRest;
+
+    public boolean isEncryptAtRest() {
+        return encryptAtRest;
+    }
+
+    public void setEncryptAtRest(boolean encryptAtRest) {
+        this.encryptAtRest = encryptAtRest;
+    }
+
     public String getSecret() {
         return secret;
     }

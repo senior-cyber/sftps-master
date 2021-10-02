@@ -2,22 +2,22 @@
     <changeSet author="Senior Cyber" id="V020__KeyTable-1">
         <createTable tableName="tbl_key">
             <column autoIncrement="true" name="key_id" type="BIGINT">
-                <constraints notNullConstraintName="notnull_key_40" nullable="false" primaryKey="true" primaryKeyName="primary_key_9"/>
+                <constraints notNullConstraintName="notnull_key_41" nullable="false" primaryKey="true" primaryKeyName="primary_key_9"/>
             </column>
             <column name="user_id" type="BIGINT">
-                <constraints notNullConstraintName="notnull_key_41" nullable="false"/>
-            </column>
-            <column name="name" type="VARCHAR(200)">
                 <constraints notNullConstraintName="notnull_key_42" nullable="false"/>
             </column>
-            <column name="certificate" type="TEXT">
+            <column name="name" type="VARCHAR(200)">
                 <constraints notNullConstraintName="notnull_key_43" nullable="false"/>
             </column>
-            <column name="private_key" type="TEXT">
+            <column name="certificate" type="TEXT">
                 <constraints notNullConstraintName="notnull_key_44" nullable="false"/>
             </column>
-            <column name="enabled" type="BOOLEAN">
+            <column name="private_key" type="TEXT">
                 <constraints notNullConstraintName="notnull_key_45" nullable="false"/>
+            </column>
+            <column name="enabled" type="BOOLEAN">
+                <constraints notNullConstraintName="notnull_key_46" nullable="false"/>
             </column>
             <column name="last_seen" type="DATETIME"/>
         </createTable>

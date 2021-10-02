@@ -3,13 +3,13 @@
 
         <createTable tableName="tbl_user_group">
             <column name="user_group_id" type="VARCHAR(100)">
-                <constraints notNullConstraintName="notnull_key_20" nullable="false" primaryKey="true" primaryKeyName="primary_key_5"/>
+                <constraints notNullConstraintName="notnull_key_21" nullable="false" primaryKey="true" primaryKeyName="primary_key_5"/>
             </column>
             <column name="r_group_id" type="BIGINT">
-                <constraints notNullConstraintName="notnull_key_21" nullable="false"/>
+                <constraints notNullConstraintName="notnull_key_22" nullable="false"/>
             </column>
             <column name="r_user_id" type="BIGINT">
-                <constraints notNullConstraintName="notnull_key_22" nullable="false"/>
+                <constraints notNullConstraintName="notnull_key_23" nullable="false"/>
             </column>
         </createTable>
         <addUniqueConstraint columnNames="r_group_id,r_user_id" constraintName="unique_index_6" tableName="tbl_user_group"/>

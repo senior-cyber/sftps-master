@@ -3,13 +3,13 @@
 
         <createTable tableName="tbl_user_role">
             <column name="user_role_id" type="VARCHAR(100)">
-                <constraints notNullConstraintName="notnull_key_17" nullable="false" primaryKey="true" primaryKeyName="primary_key_4"/>
+                <constraints notNullConstraintName="notnull_key_18" nullable="false" primaryKey="true" primaryKeyName="primary_key_4"/>
             </column>
             <column name="r_role_id" type="BIGINT">
-                <constraints notNullConstraintName="notnull_key_18" nullable="false"/>
+                <constraints notNullConstraintName="notnull_key_19" nullable="false"/>
             </column>
             <column name="r_user_id" type="BIGINT">
-                <constraints notNullConstraintName="notnull_key_19" nullable="false"/>
+                <constraints notNullConstraintName="notnull_key_20" nullable="false"/>
             </column>
         </createTable>
         <addUniqueConstraint columnNames="r_role_id,r_user_id" constraintName="unique_index_5" tableName="tbl_user_role"/>

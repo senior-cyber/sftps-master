@@ -26,13 +26,16 @@
             <column name="admin" type="BOOLEAN">
                 <constraints notNullConstraintName="notnull_key_14" nullable="false"/>
             </column>
-            <column name="home_directory" type="VARCHAR(200)">
+            <column defaultValueBoolean="true" name="encrypt_at_rest" type="BOOLEAN">
                 <constraints notNullConstraintName="notnull_key_15" nullable="false"/>
+            </column>
+            <column name="home_directory" type="VARCHAR(200)">
+                <constraints notNullConstraintName="notnull_key_16" nullable="false"/>
             </column>
             <column name="secret" type="TEXT"/>
             <column name="dek" type="TEXT"/>
             <column defaultValueBoolean="false" name="webhook_enabled" type="BOOLEAN">
-                <constraints notNullConstraintName="notnull_key_16" nullable="false"/>
+                <constraints notNullConstraintName="notnull_key_17" nullable="false"/>
             </column>
             <column name="webhook_url" type="VARCHAR(200)"/>
             <column name="webhook_secret" type="TEXT"/>

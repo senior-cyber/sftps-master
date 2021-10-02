@@ -11,6 +11,7 @@ public abstract class User_ {
     public static volatile SingularAttribute<User, Long> id;
     public static volatile SingularAttribute<User, String> displayName;
     public static volatile SingularAttribute<User, Boolean> enabled;
+    public static volatile SingularAttribute<User, Boolean> encryptAtRest;
     public static volatile SingularAttribute<User, String> login;
     public static volatile SingularAttribute<User, String> password;
     public static volatile SingularAttribute<User, String> emailAddress;

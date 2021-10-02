@@ -29,6 +29,9 @@
             <column name="admin" type="BOOLEAN">
                 <constraints nullable="false"/>
             </column>
+            <column name="encrypt_at_rest" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
             <column name="home_directory" type="VARCHAR(200)">
                 <constraints nullable="false"/>
             </column>

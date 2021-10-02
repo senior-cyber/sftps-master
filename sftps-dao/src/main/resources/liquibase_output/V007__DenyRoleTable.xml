@@ -3,13 +3,13 @@
 
         <createTable tableName="tbl_deny_role">
             <column name="deny_role_id" type="VARCHAR(100)">
-                <constraints notNullConstraintName="notnull_key_26" nullable="false" primaryKey="true" primaryKeyName="primary_key_7"/>
+                <constraints notNullConstraintName="notnull_key_27" nullable="false" primaryKey="true" primaryKeyName="primary_key_7"/>
             </column>
             <column name="r_role_id" type="BIGINT">
-                <constraints notNullConstraintName="notnull_key_27" nullable="false" unique="false" uniqueConstraintName="unique_index_8"/>
+                <constraints notNullConstraintName="notnull_key_28" nullable="false" unique="false" uniqueConstraintName="unique_index_8"/>
             </column>
             <column name="r_user_id" type="BIGINT">
-                <constraints notNullConstraintName="notnull_key_28" nullable="false" unique="false" uniqueConstraintName="unique_index_9"/>
+                <constraints notNullConstraintName="notnull_key_29" nullable="false" unique="false" uniqueConstraintName="unique_index_9"/>
             </column>
         </createTable>
         <addUniqueConstraint columnNames="r_role_id,r_user_id" constraintName="unique_index_10" tableName="tbl_deny_role"/>

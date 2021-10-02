@@ -2,20 +2,20 @@
     <changeSet author="Senior Cyber" id="V021__LogTable-1">
         <createTable tableName="tbl_log">
             <column autoIncrement="true" name="log_id" type="BIGINT">
-                <constraints notNullConstraintName="notnull_key_46" nullable="false" primaryKey="true" primaryKeyName="primary_key_10"/>
+                <constraints notNullConstraintName="notnull_key_47" nullable="false" primaryKey="true" primaryKeyName="primary_key_10"/>
             </column>
             <column name="event_type" type="VARCHAR(20)">
-                <constraints notNullConstraintName="notnull_key_47" nullable="false"/>
+                <constraints notNullConstraintName="notnull_key_48" nullable="false"/>
             </column>
             <column name="user_display_name" type="VARCHAR(200)">
-                <constraints notNullConstraintName="notnull_key_48" nullable="false"/>
+                <constraints notNullConstraintName="notnull_key_49" nullable="false"/>
             </column>
             <column name="key_name" type="VARCHAR(200)"/>
             <column name="size" type="BIGINT"/>
             <column name="src_path" type="VARCHAR(255)"/>
             <column name="dst_path" type="VARCHAR(255)"/>
             <column name="created_at" type="DATETIME">
-                <constraints notNullConstraintName="notnull_key_49" nullable="false"/>
+                <constraints notNullConstraintName="notnull_key_50" nullable="false"/>
             </column>
         </createTable>
         <createIndex indexName="index_9" tableName="tbl_log">
