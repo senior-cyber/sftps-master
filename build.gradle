@@ -20,6 +20,7 @@ buildscript {
         bouncycastle = '1.69'
         spring_cloud = '2020.0.4'
         guava = '31.0-jre'
+
         commons_codec = '1.15'
         commons_validator = '1.7'
         jasypt = '1.9.3'
