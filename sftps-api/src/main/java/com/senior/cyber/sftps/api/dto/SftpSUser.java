@@ -15,11 +15,14 @@ public class SftpSUser extends BaseUser {
 
     protected final String keyName;
 
+    protected final boolean encryptAtRest;
+
     protected final byte[] originDictionary;
 
     protected final byte[] fakeDictionary;
 
-    public SftpSUser(String userId, String keyId, String keyName, String userDisplayName, String secret) {
+    public SftpSUser(String userId, String keyId, String keyName, String userDisplayName, String secret, boolean encryptAtRest) {
+        this.encryptAtRest = encryptAtRest;
         this.userDisplayName = userDisplayName;
         this.userId = userId;
         this.keyId = keyId;
@@ -55,6 +58,10 @@ public class SftpSUser extends BaseUser {
 
     public String getUserDisplayName() {
         return userDisplayName;
+    }
+
+    public boolean isEncryptAtRest() {
+        return encryptAtRest;
     }
 
 }

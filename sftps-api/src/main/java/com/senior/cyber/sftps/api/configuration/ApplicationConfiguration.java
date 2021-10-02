@@ -25,23 +25,14 @@ public class ApplicationConfiguration {
     private int ftpsPort;
     private int scpPort;
 
-    private String secret;
-    private boolean drm;
+    private File workspace;
 
-    public boolean isDrm() {
-        return drm;
+    public File getWorkspace() {
+        return workspace;
     }
 
-    public void setDrm(boolean drm) {
-        this.drm = drm;
-    }
-
-    public String getSecret() {
-        return secret;
-    }
-
-    public void setSecret(String secret) {
-        this.secret = secret;
+    public void setWorkspace(File workspace) {
+        this.workspace = workspace;
     }
 
     public String getPassivePorts() {

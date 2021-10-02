@@ -30,7 +30,7 @@ public class SftpSNativeFileSystemView extends org.apache.ftpserver.filesystem.n
 
             // strip the root directory and return
             String userFileName = physicalName.substring(rootDir.length() - 1);
-            if (user.getOriginDictionary() == null || user.getFakeDictionary() == null) {
+            if (!user.isEncryptAtRest() || user.getOriginDictionary() == null || user.getFakeDictionary() == null) {
                 return new SftpSNativeFtpFile(userFileName, fileObj, user);
             } else {
                 return new DrmSftpSNativeFtpFile(userFileName, fileObj, user, user.getOriginDictionary(), user.getFakeDictionary());

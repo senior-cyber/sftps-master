@@ -8,6 +8,7 @@ import com.senior.cyber.frmk.common.function.HttpExtension;
 import com.senior.cyber.frmk.common.pki.CertificateUtils;
 import com.senior.cyber.frmk.common.pki.PublicKeyUtils;
 import com.senior.cyber.sftps.api.SecretUtils;
+import com.senior.cyber.sftps.api.configuration.ApplicationConfiguration;
 import com.senior.cyber.sftps.api.repository.KeyRepository;
 import com.senior.cyber.sftps.api.repository.LogRepository;
 import com.senior.cyber.sftps.api.repository.UserRepository;
@@ -68,6 +69,9 @@ public class ApiController {
     @Autowired
     protected CloseableHttpClient client;
 
+    @Autowired
+    protected ApplicationConfiguration applicationConfiguration;
+
     @DeleteMapping(path = "/**")
     public void delete(@RequestHeader(value = "Authorization", required = false) String authorization, HttpServletRequest request, HttpServletResponse response) throws CertificateException, IOException {
         authentication(authorization, request, response);
@@ -103,7 +107,9 @@ public class ApiController {
 
         String pathInfo = request.getRequestURI();
 
-        String homeDirectory = FilenameUtils.normalizeNoEndSeparator(userObject.getHomeDirectory(), true);
+        File workspace = applicationConfiguration.getWorkspace();
+
+        String homeDirectory = FilenameUtils.normalizeNoEndSeparator(new File(workspace, userObject.getHomeDirectory()).getAbsolutePath(), true);
         String fn = FilenameUtils.normalizeNoEndSeparator(new File(homeDirectory, pathInfo).getAbsolutePath(), true);
 
         if (!fn.startsWith(homeDirectory)) {
@@ -167,7 +173,9 @@ public class ApiController {
 
         String pathInfo = request.getRequestURI();
 
-        String homeDirectory = FilenameUtils.normalizeNoEndSeparator(userObject.getHomeDirectory(), true);
+        File workspace = applicationConfiguration.getWorkspace();
+
+        String homeDirectory = FilenameUtils.normalizeNoEndSeparator(new File(workspace, userObject.getHomeDirectory()).getAbsolutePath(), true);
         String fn = FilenameUtils.normalizeNoEndSeparator(new File(homeDirectory, pathInfo).getAbsolutePath(), true);
 
         if (!fn.startsWith(homeDirectory)) {
@@ -192,7 +200,7 @@ public class ApiController {
         File file = new File(fn);
         try (FileOutputStream outputStream = FileUtils.openOutputStream(file)) {
             InputStream inputStream = request.getInputStream();
-            if (originalDictionary != null) {
+            if (userObject.isEncryptAtRest() && originalDictionary != null) {
                 byte[] buffer = IOUtils.byteArray(IOUtils.DEFAULT_BUFFER_SIZE);
                 int n;
                 while (IOUtils.EOF != (n = inputStream.read(buffer))) {
@@ -279,7 +287,9 @@ public class ApiController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
         }
 
-        String homeDirectory = FilenameUtils.normalizeNoEndSeparator(userObject.getHomeDirectory(), true);
+        File workspace = applicationConfiguration.getWorkspace();
+
+        String homeDirectory = FilenameUtils.normalizeNoEndSeparator(new File(workspace, userObject.getHomeDirectory()).getAbsolutePath(), true);
         String fn = FilenameUtils.normalizeNoEndSeparator(new File(homeDirectory, pathInfo).getAbsolutePath(), true);
 
         if (!fn.startsWith(homeDirectory)) {
@@ -350,7 +360,7 @@ public class ApiController {
             response.setContentLengthLong(file.length());
             try (InputStream inputStream = FileUtils.openInputStream(file)) {
                 OutputStream outputStream = response.getOutputStream();
-                if (fakeDictionary != null) {
+                if (userObject.isEncryptAtRest() && fakeDictionary != null) {
                     byte[] buffer = IOUtils.byteArray(IOUtils.DEFAULT_BUFFER_SIZE);
                     int n;
                     while (IOUtils.EOF != (n = inputStream.read(buffer))) {

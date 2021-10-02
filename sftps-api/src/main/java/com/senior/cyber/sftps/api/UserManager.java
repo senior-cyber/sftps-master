@@ -1,5 +1,8 @@
 package com.senior.cyber.sftps.api;
 
+import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.JsonKeysetReader;
+import com.google.crypto.tink.KeysetHandle;
 import com.senior.cyber.frmk.common.pki.CertificateUtils;
 import com.senior.cyber.frmk.common.pki.PublicKeyUtils;
 import com.senior.cyber.sftps.api.configuration.ApplicationConfiguration;
@@ -9,9 +12,6 @@ import com.senior.cyber.sftps.api.repository.UserRepository;
 import com.senior.cyber.sftps.api.tink.MasterAead;
 import com.senior.cyber.sftps.dao.entity.Key;
 import com.senior.cyber.sftps.dao.entity.User;
-import com.google.crypto.tink.Aead;
-import com.google.crypto.tink.JsonKeysetReader;
-import com.google.crypto.tink.KeysetHandle;
 import org.apache.ftpserver.ftplet.Authentication;
 import org.apache.ftpserver.ftplet.AuthenticationFailedException;
 import org.apache.ftpserver.ftplet.Authority;
@@ -73,10 +73,10 @@ public class UserManager implements org.apache.ftpserver.ftplet.UserManager, Pas
 
             String dek = userObject.getDek();
 
-            File homeDirectory = new File(userObject.getHomeDirectory());
+            File homeDirectory = new File(configuration.getWorkspace(), userObject.getHomeDirectory());
             homeDirectory.mkdirs();
 
-            return authenticated(String.valueOf(userObject.getId()), username, null, null, userObject.getDisplayName(), userObject.getSecret(), masterAead, dek, homeDirectory);
+            return authenticated(String.valueOf(userObject.getId()), username, null, null, userObject.getDisplayName(), userObject.getSecret(), masterAead, dek, homeDirectory, userObject.isEncryptAtRest());
         } catch (GeneralSecurityException | IOException e) {
             throw new FtpException(e);
         }
@@ -147,7 +147,7 @@ public class UserManager implements org.apache.ftpserver.ftplet.UserManager, Pas
 
                     try {
                         String dek = userObject.getDek();
-                        return authenticated(userId, login, null, null, userObject.getDisplayName(), userObject.getSecret(), this.masterAead, dek, new File(userObject.getHomeDirectory()));
+                        return authenticated(userId, login, null, null, userObject.getDisplayName(), userObject.getSecret(), this.masterAead, dek, new File(configuration.getWorkspace(), userObject.getHomeDirectory()), userObject.isEncryptAtRest());
                     } catch (GeneralSecurityException | IOException e) {
                         throw new AuthenticationFailedException(e);
                     }
@@ -173,7 +173,7 @@ public class UserManager implements org.apache.ftpserver.ftplet.UserManager, Pas
 
                                 String dek = userObject.getDek();
 
-                                return authenticated(userId, login, keyId, key.getName(), userObject.getDisplayName(), userObject.getSecret(), this.masterAead, dek, new File(userObject.getHomeDirectory()));
+                                return authenticated(userId, login, keyId, key.getName(), userObject.getDisplayName(), userObject.getSecret(), this.masterAead, dek, new File(configuration.getWorkspace(), userObject.getHomeDirectory()), userObject.isEncryptAtRest());
                             }
                         }
                     }
@@ -189,7 +189,7 @@ public class UserManager implements org.apache.ftpserver.ftplet.UserManager, Pas
         }
     }
 
-    private SftpSUser authenticated(String userId, String userName, String keyId, String keyName, String userDisplayName, String black_secret, MasterAead masterAead, String dek, File homeDirectory) throws GeneralSecurityException, IOException {
+    private SftpSUser authenticated(String userId, String userName, String keyId, String keyName, String userDisplayName, String black_secret, MasterAead masterAead, String dek, File homeDirectory, boolean encryptAtRest) throws GeneralSecurityException, IOException {
         String white_secret = null;
         if (dek != null && !"".equals(dek) && black_secret != null && !"".equals(black_secret)) {
             Aead aeadDek = KeysetHandle.read(JsonKeysetReader.withString(dek), masterAead).getPrimitive(Aead.class);
@@ -198,7 +198,7 @@ public class UserManager implements org.apache.ftpserver.ftplet.UserManager, Pas
         if (white_secret != null) {
             LOGGER.info("white_secret [{}]", white_secret);
         }
-        SftpSUser user = new SftpSUser(userId, keyId, keyName, userDisplayName, white_secret);
+        SftpSUser user = new SftpSUser(userId, keyId, keyName, userDisplayName, white_secret, encryptAtRest);
         user.setName(userName);
         homeDirectory.mkdirs();
         user.setHomeDirectory(homeDirectory.getAbsolutePath());
@@ -258,12 +258,12 @@ public class UserManager implements org.apache.ftpserver.ftplet.UserManager, Pas
 
                     Audit.log(username + " connected " + ((InetSocketAddress) session.getClientAddress()).getHostName());
 
-                    File homeDirectory = new File(userObject.getHomeDirectory());
+                    File homeDirectory = new File(configuration.getWorkspace(), userObject.getHomeDirectory());
                     homeDirectory.mkdirs();
 
                     String dek = userObject.getDek();
 
-                    SftpSUser user = authenticated(String.valueOf(userObject.getId()), username, keyId, key.getName(), userObject.getDisplayName(), userObject.getSecret(), this.masterAead, dek, homeDirectory);
+                    SftpSUser user = authenticated(String.valueOf(userObject.getId()), username, keyId, key.getName(), userObject.getDisplayName(), userObject.getSecret(), this.masterAead, dek, homeDirectory, userObject.isEncryptAtRest());
                     session.getProperties().put(SftpSUser.USER_SESSION, user);
 
                     return true;
@@ -301,12 +301,12 @@ public class UserManager implements org.apache.ftpserver.ftplet.UserManager, Pas
 
                 Audit.log(username + " connected " + ((InetSocketAddress) session.getClientAddress()).getHostName());
 
-                File homeDirectory = new File(userObject.getHomeDirectory());
+                File homeDirectory = new File(configuration.getWorkspace(), userObject.getHomeDirectory());
                 homeDirectory.mkdirs();
 
                 String dek = userObject.getDek();
 
-                SftpSUser user = authenticated(String.valueOf(userObject.getId()), username, null, null, userObject.getDisplayName(), userObject.getSecret(), this.masterAead, dek, homeDirectory);
+                SftpSUser user = authenticated(String.valueOf(userObject.getId()), username, null, null, userObject.getDisplayName(), userObject.getSecret(), this.masterAead, dek, homeDirectory, userObject.isEncryptAtRest());
                 session.getProperties().put(SftpSUser.USER_SESSION, user);
 
                 return true;

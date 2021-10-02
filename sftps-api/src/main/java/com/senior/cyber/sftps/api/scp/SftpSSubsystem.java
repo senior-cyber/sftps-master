@@ -27,7 +27,7 @@ public class SftpSSubsystem extends org.apache.sshd.sftp.server.SftpSubsystem {
         ServerSession session = getServerSession();
         SftpSUser user = (SftpSUser) session.getProperties().get(SftpSUser.USER_SESSION);
 
-        if (user.getFakeDictionary() == null || user.getOriginDictionary() == null) {
+        if (!user.isEncryptAtRest() || user.getFakeDictionary() == null || user.getOriginDictionary() == null) {
             return super.doOpen(id, path, pflags, access, attrs);
         }
 
