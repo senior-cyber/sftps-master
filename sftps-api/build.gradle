@@ -50,7 +50,6 @@ dependencies {
     implementation "org.reflections:reflections:${reflections}"
     implementation "commons-beanutils:commons-beanutils:${commons_beanutils}"
     implementation "com.google.guava:guava:${guava}"
-    implementation "commons-io:commons-io:${commons_io}"
     implementation "com.jcraft:jsch:${jsch}"
     implementation "org.apache.sshd:sshd-core:${sshd}"
     implementation "org.apache.sshd:sshd-sftp:${sshd}"
