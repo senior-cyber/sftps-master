@@ -110,6 +110,9 @@ public class ApiController {
         File workspace = applicationConfiguration.getWorkspace();
 
         String homeDirectory = FilenameUtils.normalizeNoEndSeparator(new File(workspace, userObject.getHomeDirectory()).getAbsolutePath(), true);
+
+        LOGGER.info("homeDirectory [{}]", homeDirectory);
+
         String fn = FilenameUtils.normalizeNoEndSeparator(new File(homeDirectory, pathInfo).getAbsolutePath(), true);
 
         if (!fn.startsWith(homeDirectory)) {
@@ -176,6 +179,9 @@ public class ApiController {
         File workspace = applicationConfiguration.getWorkspace();
 
         String homeDirectory = FilenameUtils.normalizeNoEndSeparator(new File(workspace, userObject.getHomeDirectory()).getAbsolutePath(), true);
+
+        LOGGER.info("homeDirectory [{}]", homeDirectory);
+
         String fn = FilenameUtils.normalizeNoEndSeparator(new File(homeDirectory, pathInfo).getAbsolutePath(), true);
 
         if (!fn.startsWith(homeDirectory)) {
@@ -290,6 +296,9 @@ public class ApiController {
         File workspace = applicationConfiguration.getWorkspace();
 
         String homeDirectory = FilenameUtils.normalizeNoEndSeparator(new File(workspace, userObject.getHomeDirectory()).getAbsolutePath(), true);
+
+        LOGGER.info("homeDirectory [{}]", homeDirectory);
+
         String fn = FilenameUtils.normalizeNoEndSeparator(new File(homeDirectory, pathInfo).getAbsolutePath(), true);
 
         if (!fn.startsWith(homeDirectory)) {

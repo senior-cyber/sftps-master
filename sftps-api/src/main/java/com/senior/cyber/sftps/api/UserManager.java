@@ -190,6 +190,7 @@ public class UserManager implements org.apache.ftpserver.ftplet.UserManager, Pas
     }
 
     private SftpSUser authenticated(String userId, String userName, String keyId, String keyName, String userDisplayName, String black_secret, MasterAead masterAead, String dek, File homeDirectory, boolean encryptAtRest) throws GeneralSecurityException, IOException {
+        LOGGER.info("homeDirectory [{}]", homeDirectory.getAbsolutePath());
         String white_secret = null;
         if (dek != null && !"".equals(dek) && black_secret != null && !"".equals(black_secret)) {
             Aead aeadDek = KeysetHandle.read(JsonKeysetReader.withString(dek), masterAead).getPrimitive(Aead.class);
