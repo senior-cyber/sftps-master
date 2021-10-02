@@ -185,7 +185,7 @@ public class SftpSFactory extends AbstractFactoryBean<SftpS> {
         int scpPort = this.configuration.getScpPort();
         if (scpPort != -1 && scpPort != 0) {
             sshd = SshServer.setUpDefaultServer();
-            sshd.setFileSystemFactory(new SftpSVirtualFileSystemFactory(this.userRepository));
+            sshd.setFileSystemFactory(new SftpSVirtualFileSystemFactory(this.configuration, this.userRepository));
 
             File key = new File(FileUtils.getTempDirectory(), BootApplication.class.getSimpleName() + ".key");
             SimpleGeneratorHostKeyProvider provider = new SimpleGeneratorHostKeyProvider(FileSystems.getDefault().getPath(key.getAbsolutePath()));
