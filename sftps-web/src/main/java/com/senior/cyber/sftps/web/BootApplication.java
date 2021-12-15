@@ -6,7 +6,6 @@ import com.senior.cyber.sftps.web.factory.WicketFactory;
 import com.senior.cyber.sftps.web.tink.Crypto;
 import com.senior.cyber.sftps.web.tink.MasterAead;
 import com.senior.cyber.sftps.web.tink.PkiKeyClient;
-import com.senior.cyber.frmk.common.function.BootExtension;
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeysetHandle;
@@ -19,6 +18,7 @@ import com.google.gson.GsonBuilder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.jasypt.util.password.PasswordEncryptor;
 import org.jasypt.util.password.StrongPasswordEncryptor;
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
@@ -43,7 +43,7 @@ public class BootApplication {
     public static void main(String[] args) throws Exception {
         AeadConfig.register();
         StreamingAeadConfig.register();
-        BootExtension.run(BootApplication.class, args);
+        SpringApplication.run(BootApplication.class, args);
     }
 
     public static ApplicationContext getApplicationContext() {

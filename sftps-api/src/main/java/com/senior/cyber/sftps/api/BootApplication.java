@@ -9,7 +9,6 @@ import com.google.crypto.tink.aead.KmsAeadKeyManager;
 import com.google.crypto.tink.streamingaead.StreamingAeadConfig;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.senior.cyber.frmk.common.function.BootExtension;
 import com.senior.cyber.sftps.api.configuration.CryptoConfiguration;
 import com.senior.cyber.sftps.api.configuration.MasterAeadConfiguration;
 import com.senior.cyber.sftps.api.factory.SftpSFactory;
@@ -21,6 +20,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.jasypt.util.password.PasswordEncryptor;
 import org.jasypt.util.password.StrongPasswordEncryptor;
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
@@ -42,7 +42,7 @@ public class BootApplication {
     public static void main(String[] args) throws Exception {
         AeadConfig.register();
         StreamingAeadConfig.register();
-        BootExtension.run(BootApplication.class, args);
+        SpringApplication.run(BootApplication.class, args);
     }
 
     @Bean
