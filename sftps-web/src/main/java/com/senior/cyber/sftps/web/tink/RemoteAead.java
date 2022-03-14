@@ -63,7 +63,6 @@ public class RemoteAead implements Aead {
             } else {
                 throw new GeneralSecurityException("encryption error");
             }
-
         } catch (IOException e) {
             throw new GeneralSecurityException(e);
         }
