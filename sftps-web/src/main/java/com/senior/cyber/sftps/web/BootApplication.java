@@ -65,7 +65,7 @@ public class BootApplication {
 
     @Bean(destroyMethod = "close")
     public PkiKeyClient createPkiKeyClient(Crypto crypto, MasterAeadConfiguration configuration) {
-        PkiKeyClient client = new PkiKeyClient(crypto, configuration.getClientSecret());
+        PkiKeyClient client = new PkiKeyClient(crypto, configuration.getAddress(), configuration.getClientSecret());
         KmsClients.add(client);
         return client;
     }
