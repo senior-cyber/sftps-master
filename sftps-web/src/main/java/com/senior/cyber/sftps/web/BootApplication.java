@@ -1,6 +1,5 @@
 package com.senior.cyber.sftps.web;
 
-import com.senior.cyber.sftps.web.configuration.CryptoConfiguration;
 import com.senior.cyber.sftps.web.configuration.MasterAeadConfiguration;
 import com.senior.cyber.sftps.web.factory.WicketFactory;
 import com.senior.cyber.sftps.web.tink.Crypto;
@@ -41,6 +40,9 @@ public class BootApplication {
     }
 
     public static void main(String[] args) throws Exception {
+        // java -jar sftps-web.jar --spring.config.location=file:///opt/sftps-master/ --spring.config.name=sftps-web
+        // java -jar sftps-api.jar --spring.config.location=file:///opt/sftps-master/ --spring.config.name=sftps-api
+        // $JAVA_HOME/bin/keytool -trustcacerts -keystore SftpS_Innovation.jks -storepass changeit -alias SftpS_Innovation -import -file SftpS_Innovation.crt
         AeadConfig.register();
         StreamingAeadConfig.register();
         SpringApplication.run(BootApplication.class, args);
@@ -78,8 +80,8 @@ public class BootApplication {
     }
 
     @Bean
-    public Crypto createCrypto(CryptoConfiguration configuration) {
-        return new Crypto(configuration.getIv());
+    public Crypto createCrypto() {
+        return new Crypto();
     }
 
 }

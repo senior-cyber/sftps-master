@@ -22,6 +22,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.sshd.common.config.keys.KeyUtils;
 import org.apache.sshd.server.SshServer;
 import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.jasypt.util.password.PasswordEncryptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +31,7 @@ import org.springframework.beans.factory.config.AbstractFactoryBean;
 
 import java.io.File;
 import java.nio.file.FileSystems;
+import java.security.Security;
 import java.util.Collections;
 
 public class SftpSFactory extends AbstractFactoryBean<SftpS> {
@@ -71,8 +73,10 @@ public class SftpSFactory extends AbstractFactoryBean<SftpS> {
     @Override
     protected SftpS createInstance() throws Exception {
 
+        int ftpsPort = this.configuration.getFtpsPort();
+
         SslConfiguration sslConfiguration = null;
-        {
+        if (ftpsPort != -1 && ftpsPort != 0) {
             SslConfigurationFactory factory = new SslConfigurationFactory();
             File trustStore = this.configuration.getTrustStore();
             factory.setTruststoreType(this.configuration.getTrustStoreType());
@@ -130,7 +134,6 @@ public class SftpSFactory extends AbstractFactoryBean<SftpS> {
         SftpSFtplet sftpSFtplet = new SftpSFtplet(this.client, this.userRepository, this.keyRepository, this.logRepository, masterAead);
         UserManager userManager = new UserManager(this.passwordEncryptor, this.userRepository, this.keyRepository, this.configuration, this.masterAead);
 
-        int ftpsPort = this.configuration.getFtpsPort();
         if (ftpsPort != -1 && ftpsPort != 0) {
             boolean ssl = false;
             ListenerFactory listenerFactory = new ListenerFactory();

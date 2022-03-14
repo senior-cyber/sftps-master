@@ -9,7 +9,6 @@ import com.google.crypto.tink.aead.KmsAeadKeyManager;
 import com.google.crypto.tink.streamingaead.StreamingAeadConfig;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.senior.cyber.sftps.api.configuration.CryptoConfiguration;
 import com.senior.cyber.sftps.api.configuration.MasterAeadConfiguration;
 import com.senior.cyber.sftps.api.factory.SftpSFactory;
 import com.senior.cyber.sftps.api.tink.Crypto;
@@ -78,8 +77,8 @@ public class BootApplication {
     }
 
     @Bean
-    public Crypto createCrypto(CryptoConfiguration configuration) {
-        return new Crypto(configuration.getIv());
+    public Crypto createCrypto() {
+        return new Crypto();
     }
 
     @Bean(destroyMethod = "close")

@@ -22,7 +22,7 @@ public class RemoteAead implements Aead {
 
     private final String serviceUrl;
 
-    private final String clientSecret;
+    private final String  clientSecret;
 
     private final CloseableHttpClient client;
 
