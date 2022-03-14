@@ -48,8 +48,9 @@ dependencies {
     implementation "org.apache.ftpserver:ftpserver-core:${ftpserver}"
 
     implementation "mysql:mysql-connector-java"
-    implementation "org.flywaydb:flyway-core:${flyway}"
-    implementation "org.liquibase:liquibase-core:${liquibase}"
+    implementation "org.flywaydb:flyway-core"
+    implementation "org.liquibase:liquibase-core"
+
     implementation "org.reflections:reflections:${reflections}"
     implementation "commons-beanutils:commons-beanutils:${commons_beanutils}"
     implementation "com.google.guava:guava:${guava}"
