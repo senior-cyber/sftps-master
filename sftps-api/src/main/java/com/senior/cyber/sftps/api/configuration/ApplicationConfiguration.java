@@ -20,6 +20,9 @@ public class ApplicationConfiguration {
     private String keyAlias;
     private String keyPassword;
 
+    private String passiveAddress;
+    private String passiveExternalAddress;
+
     private int ftpPort;
     private String ftpDataPort;
 
@@ -29,6 +32,22 @@ public class ApplicationConfiguration {
     private int sftpPort;
 
     private File workspace;
+
+    public String getPassiveAddress() {
+        return passiveAddress;
+    }
+
+    public void setPassiveAddress(String passiveAddress) {
+        this.passiveAddress = passiveAddress;
+    }
+
+    public String getPassiveExternalAddress() {
+        return passiveExternalAddress;
+    }
+
+    public void setPassiveExternalAddress(String passiveExternalAddress) {
+        this.passiveExternalAddress = passiveExternalAddress;
+    }
 
     public File getWorkspace() {
         return workspace;

@@ -155,6 +155,13 @@ public class SftpSFactory extends AbstractFactoryBean<SftpS> {
                 String ftpsDataPort = this.configuration.getFtpsDataPort();
                 DataConnectionConfigurationFactory factory = new DataConnectionConfigurationFactory();
                 factory.setPassivePorts(ftpsDataPort);
+                if (this.configuration.getPassiveAddress() != null && !"".equals(this.configuration.getPassiveAddress())) {
+                    factory.setPassiveAddress(this.configuration.getPassiveAddress());
+                }
+                if (this.configuration.getPassiveExternalAddress() != null && !"".equals(this.configuration.getPassiveExternalAddress())) {
+                    factory.setPassiveExternalAddress(this.configuration.getPassiveExternalAddress());
+                }
+                factory.setPassiveIpCheck(true);
                 factory.setSslConfiguration(sslConfiguration);
                 factory.setImplicitSsl(true);
                 listenerFactory.setDataConnectionConfiguration(factory.createDataConnectionConfiguration());
@@ -174,6 +181,12 @@ public class SftpSFactory extends AbstractFactoryBean<SftpS> {
         if (ftpPort != -1 && ftpPort != 0) {
             String ftpDataPort = this.configuration.getFtpDataPort();
             DataConnectionConfigurationFactory factory = new DataConnectionConfigurationFactory();
+            if (this.configuration.getPassiveAddress() != null && !"".equals(this.configuration.getPassiveAddress())) {
+                factory.setPassiveAddress(this.configuration.getPassiveAddress());
+            }
+            if (this.configuration.getPassiveExternalAddress() != null && !"".equals(this.configuration.getPassiveExternalAddress())) {
+                factory.setPassiveExternalAddress(this.configuration.getPassiveExternalAddress());
+            }
             factory.setPassivePorts(ftpDataPort);
             ListenerFactory listenerFactory = new ListenerFactory();
             listenerFactory.setPort(ftpPort);
