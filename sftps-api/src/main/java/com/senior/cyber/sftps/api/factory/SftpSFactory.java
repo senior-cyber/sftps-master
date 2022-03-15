@@ -134,6 +134,8 @@ public class SftpSFactory extends AbstractFactoryBean<SftpS> {
         SftpSFtplet sftpSFtplet = new SftpSFtplet(this.client, this.userRepository, this.keyRepository, this.logRepository, masterAead);
         UserManager userManager = new UserManager(this.passwordEncryptor, this.userRepository, this.keyRepository, this.configuration, this.masterAead);
 
+        boolean printed = false;
+
         if (ftpsPort != -1 && ftpsPort != 0) {
             boolean ssl = false;
             ListenerFactory listenerFactory = new ListenerFactory();
@@ -158,8 +160,11 @@ public class SftpSFactory extends AbstractFactoryBean<SftpS> {
                 this.ftpsserver = serverFactory.createServer();
                 this.ftpsserver.start();
                 DataConnectionConfiguration configuration = listenerFactory.getDataConnectionConfiguration();
+                if (!printed) {
+                    LOGGER.info("          Data Port [" + configuration.getPassivePorts() + "]");
+                    printed = true;
+                }
                 LOGGER.info("          FTPS Port [" + ftpsPort + "] [Implicit SSL]");
-                LOGGER.info("       PassivePorts [" + configuration.getPassivePorts() + "]");
             }
         }
 
@@ -181,8 +186,11 @@ public class SftpSFactory extends AbstractFactoryBean<SftpS> {
             this.ftpserver = serverFactory.createServer();
             this.ftpserver.start();
             DataConnectionConfiguration configuration = listenerFactory.getDataConnectionConfiguration();
-            LOGGER.info(" :           FTP Port [" + ftpPort + "]");
-            LOGGER.info(" :       PassivePorts [" + configuration.getPassivePorts() + "]");
+            if (!printed) {
+                LOGGER.info("          Data Port [" + configuration.getPassivePorts() + "]");
+                printed = true;
+            }
+            LOGGER.info("           FTP Port [" + ftpPort + "]");
         }
 
         int scpPort = this.configuration.getScpPort();
@@ -212,7 +220,7 @@ public class SftpSFactory extends AbstractFactoryBean<SftpS> {
 
             sshd.setPort(scpPort);
             sshd.start();
-            LOGGER.info(" :           SCP Port [" + scpPort + "]");
+            LOGGER.info(" :          SFTP Port [" + scpPort + "]");
         }
 
         return new SftpS();
