@@ -20,10 +20,13 @@ public class ApplicationConfiguration {
     private String keyAlias;
     private String keyPassword;
 
-    private String passivePorts;
     private int ftpPort;
+    private String ftpDataPort;
+
     private int ftpsPort;
-    private int scpPort;
+    private String ftpsDataPort;
+
+    private int sftpPort;
 
     private File workspace;
 
@@ -33,14 +36,6 @@ public class ApplicationConfiguration {
 
     public void setWorkspace(File workspace) {
         this.workspace = workspace;
-    }
-
-    public String getPassivePorts() {
-        return passivePorts;
-    }
-
-    public void setPassivePorts(String passivePorts) {
-        this.passivePorts = passivePorts;
     }
 
     public int getFtpPort() {
@@ -59,12 +54,28 @@ public class ApplicationConfiguration {
         this.ftpsPort = ftpsPort;
     }
 
-    public int getScpPort() {
-        return scpPort;
+    public int getSftpPort() {
+        return sftpPort;
     }
 
-    public void setScpPort(int scpPort) {
-        this.scpPort = scpPort;
+    public void setSftpPort(int sftpPort) {
+        this.sftpPort = sftpPort;
+    }
+
+    public String getFtpDataPort() {
+        return ftpDataPort;
+    }
+
+    public void setFtpDataPort(String ftpDataPort) {
+        this.ftpDataPort = ftpDataPort;
+    }
+
+    public String getFtpsDataPort() {
+        return ftpsDataPort;
+    }
+
+    public void setFtpsDataPort(String ftpsDataPort) {
+        this.ftpsDataPort = ftpsDataPort;
     }
 
     public String getTrustStoreType() {

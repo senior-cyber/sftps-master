@@ -150,9 +150,9 @@ public class SftpSFactory extends AbstractFactoryBean<SftpS> {
                 ssl = true;
             }
             if (ssl) {
-                String passivePorts = this.configuration.getPassivePorts();
+                String ftpsDataPort = this.configuration.getFtpsDataPort();
                 DataConnectionConfigurationFactory factory = new DataConnectionConfigurationFactory();
-                factory.setPassivePorts(passivePorts);
+                factory.setPassivePorts(ftpsDataPort);
                 factory.setSslConfiguration(sslConfiguration);
                 factory.setImplicitSsl(true);
                 listenerFactory.setDataConnectionConfiguration(factory.createDataConnectionConfiguration());
@@ -164,15 +164,16 @@ public class SftpSFactory extends AbstractFactoryBean<SftpS> {
                 this.ftpsserver = serverFactory.createServer();
                 this.ftpsserver.start();
                 logs.add("          ftps port [" + ftpsPort + "] [Implicit SSL]");
+                logs.add("     data ftps port [" + ftpsDataPort + "]");
                 hasFtpsport = true;
             }
         }
 
         int ftpPort = this.configuration.getFtpPort();
         if (ftpPort != -1 && ftpPort != 0) {
-            String passivePorts = this.configuration.getPassivePorts();
+            String ftpDataPort = this.configuration.getFtpDataPort();
             DataConnectionConfigurationFactory factory = new DataConnectionConfigurationFactory();
-            factory.setPassivePorts(passivePorts);
+            factory.setPassivePorts(ftpDataPort);
             ListenerFactory listenerFactory = new ListenerFactory();
             listenerFactory.setPort(ftpPort);
             listenerFactory.setDataConnectionConfiguration(factory.createDataConnectionConfiguration());
@@ -186,15 +187,12 @@ public class SftpSFactory extends AbstractFactoryBean<SftpS> {
             this.ftpserver = serverFactory.createServer();
             this.ftpserver.start();
             logs.add("           ftp port [" + ftpPort + "]");
+            logs.add("      data ftp port [" + ftpDataPort + "]");
             hasFtpPort = true;
         }
 
-        if (hasFtpPort || hasFtpsport) {
-            logs.add("          data port [" + configuration.getPassivePorts() + "]");
-        }
-
-        int scpPort = this.configuration.getScpPort();
-        if (scpPort != -1 && scpPort != 0) {
+        int sftpPort = this.configuration.getSftpPort();
+        if (sftpPort != -1 && sftpPort != 0) {
             sshd = SshServer.setUpDefaultServer();
             sshd.setFileSystemFactory(new SftpSVirtualFileSystemFactory(this.configuration, this.userRepository));
 
@@ -211,9 +209,9 @@ public class SftpSFactory extends AbstractFactoryBean<SftpS> {
             sshd.setSubsystemFactories(Collections.singletonList(sftp));
             sftp.addSftpEventListener(new SftpSEventListenerAdapter(this.logRepository, this.client, this.userRepository, masterAead));
 
-            sshd.setPort(scpPort);
+            sshd.setPort(sftpPort);
             sshd.start();
-            logs.add("          sftp port [" + scpPort + "]");
+            logs.add("          sftp port [" + sftpPort + "]");
         }
         for (String log : logs) {
             LOGGER.info(log);
