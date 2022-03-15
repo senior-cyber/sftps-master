@@ -51,12 +51,14 @@ dependencies {
     implementation "org.flywaydb:flyway-core"
     implementation "org.liquibase:liquibase-core"
 
+    implementation "org.apache.sshd:sshd-core:${sshd}"
+    implementation "org.apache.sshd:sshd-sftp:${sshd}"
+    implementation "org.apache.sshd:sshd-scp:${sshd}"
+
     implementation "org.reflections:reflections:${reflections}"
     implementation "commons-beanutils:commons-beanutils:${commons_beanutils}"
     implementation "com.google.guava:guava:${guava}"
     implementation "com.jcraft:jsch:${jsch}"
-    implementation "org.apache.sshd:sshd-core:${sshd}"
-    implementation "org.apache.sshd:sshd-sftp:${sshd}"
     implementation "com.google.crypto.tink:tink:${google_tink}"
 
 }
