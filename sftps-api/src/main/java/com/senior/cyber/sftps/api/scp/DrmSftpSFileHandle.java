@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class DrmSftpSFileHandle extends org.apache.sshd.sftp.server.FileHandle {
 
@@ -30,11 +31,12 @@ public class DrmSftpSFileHandle extends org.apache.sshd.sftp.server.FileHandle {
     }
 
     @Override
-    public int read(byte[] data, int doff, int length, long offset) throws IOException {
-        int read = super.read(data, doff, length, offset);
+    public int read(byte[] data, int doff, int length, long offset, AtomicReference<Boolean> eof) throws IOException {
+        int read = super.read(data, doff, length, offset, eof);
         for (int i = doff; i < doff + length; i++) {
             data[i] = SecretUtils.translate(this.fakeDictionary, data[i]);
         }
         return read;
     }
+    
 }
