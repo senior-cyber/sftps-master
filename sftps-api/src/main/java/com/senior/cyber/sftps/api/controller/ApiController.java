@@ -36,6 +36,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.*;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
@@ -105,7 +106,7 @@ public class ApiController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
         }
 
-        String pathInfo = request.getRequestURI();
+        String pathInfo = URLDecoder.decode(request.getRequestURI(), StandardCharsets.UTF_8);
 
         File workspace = applicationConfiguration.getWorkspace();
 
@@ -178,7 +179,7 @@ public class ApiController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
         }
 
-        String pathInfo = request.getRequestURI();
+        String pathInfo = URLDecoder.decode(request.getRequestURI(), StandardCharsets.UTF_8);
 
         File workspace = applicationConfiguration.getWorkspace();
 
@@ -245,7 +246,7 @@ public class ApiController {
 
     @GetMapping(path = "/**")
     public void get(@RequestHeader(value = "Authorization", required = false) String authorization, HttpServletRequest request, HttpServletResponse response) throws IOException, GeneralSecurityException {
-        String pathInfo = request.getRequestURI();
+        String pathInfo = URLDecoder.decode(request.getRequestURI(), StandardCharsets.UTF_8);
         if (pathInfo.equals("/___folder.gif")) {
             response.setContentType("image/gif");
             try (InputStream stream = ApiController.class.getResourceAsStream("/folder.gif")) {
