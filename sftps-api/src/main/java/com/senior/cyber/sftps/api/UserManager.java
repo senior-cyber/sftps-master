@@ -192,9 +192,13 @@ public class UserManager implements org.apache.ftpserver.ftplet.UserManager, Pas
     private SftpSUser authenticated(String userId, String userName, String keyId, String keyName, String userDisplayName, String black_secret, MasterAead masterAead, String dek, File homeDirectory, boolean encryptAtRest) throws GeneralSecurityException, IOException {
         LOGGER.info("homeDirectory [{}]", homeDirectory.getAbsolutePath());
         String white_secret = null;
-        if (dek != null && !"".equals(dek) && black_secret != null && !"".equals(black_secret)) {
-            Aead aeadDek = KeysetHandle.read(JsonKeysetReader.withString(dek), masterAead).getPrimitive(Aead.class);
-            white_secret = new String(aeadDek.decrypt(Base64.getDecoder().decode(black_secret), "".getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
+        if (black_secret != null && !"".equals(black_secret)) {
+            if (dek != null && !"".equals(dek)) {
+                Aead aeadDek = KeysetHandle.read(JsonKeysetReader.withString(dek), masterAead).getPrimitive(Aead.class);
+                white_secret = new String(aeadDek.decrypt(Base64.getDecoder().decode(black_secret), "".getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
+            } else {
+                white_secret = black_secret;
+            }
         }
         if (white_secret != null) {
             LOGGER.info("white_secret [{}]", white_secret);

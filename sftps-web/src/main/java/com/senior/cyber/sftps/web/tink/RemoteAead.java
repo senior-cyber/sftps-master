@@ -22,7 +22,7 @@ public class RemoteAead implements Aead {
 
     private final String serviceUrl;
 
-    private final String clientSecret;
+    private final String  clientSecret;
 
     private final CloseableHttpClient client;
 
@@ -63,7 +63,6 @@ public class RemoteAead implements Aead {
             } else {
                 throw new GeneralSecurityException("encryption error");
             }
-
         } catch (IOException e) {
             throw new GeneralSecurityException(e);
         }

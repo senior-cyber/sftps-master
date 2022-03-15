@@ -7,9 +7,19 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "master.aead", ignoreUnknownFields = true)
 public class MasterAeadConfiguration {
 
+    private String address;
+
     private String uri;
 
     private String clientSecret;
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
 
     public String getUri() {
         return uri;

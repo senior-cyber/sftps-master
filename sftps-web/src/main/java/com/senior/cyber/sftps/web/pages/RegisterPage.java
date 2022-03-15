@@ -8,6 +8,7 @@ import com.senior.cyber.frmk.common.wicket.markup.html.panel.ComponentFeedbackPa
 import com.senior.cyber.sftps.dao.entity.Group;
 import com.senior.cyber.sftps.dao.entity.User;
 import com.senior.cyber.sftps.web.SecretUtils;
+import com.senior.cyber.sftps.web.configuration.ApplicationConfiguration;
 import com.senior.cyber.sftps.web.repository.GroupRepository;
 import com.senior.cyber.sftps.web.repository.UserRepository;
 import com.senior.cyber.sftps.web.tink.MasterAead;
@@ -127,14 +128,30 @@ public class RegisterPage extends WebPage {
             UserRepository userRepository = context.getBean(UserRepository.class);
             GroupRepository groupRepository = context.getBean(GroupRepository.class);
             PasswordEncryptor passwordEncryptor = context.getBean(PasswordEncryptor.class);
+            ApplicationConfiguration applicationConfiguration = context.getBean(ApplicationConfiguration.class);
 
             Optional<Group> optionalGroup = groupRepository.findByName("Registered");
             Group group = optionalGroup.orElseThrow(() -> new WicketRuntimeException(""));
 
             MasterAead kek = context.getBean(MasterAead.class);
 
-            KeysetHandle aeadDekHandle = KeysetHandle.generateNew(KeyTemplates.get("AES256_GCM"));
-            Aead aeadDek = aeadDekHandle.getPrimitive(Aead.class);
+            String dek = null;
+            String secret = null;
+            if (applicationConfiguration.isSecretEncryption()) {
+                KeysetHandle aeadDekHandle = KeysetHandle.generateNew(KeyTemplates.get("AES256_GCM"));
+                Aead aeadDek = aeadDekHandle.getPrimitive(Aead.class);
+                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                KeysetWriter writer = JsonKeysetWriter.withOutputStream(stream);
+                aeadDekHandle.write(writer, kek);
+                dek = stream.toString(StandardCharsets.UTF_8);
+                if (applicationConfiguration.isDataEncryption()) {
+                    secret = Base64.getEncoder().withoutPadding().encodeToString(aeadDek.encrypt(SecretUtils.generateSecret().getBytes(StandardCharsets.UTF_8), "".getBytes(StandardCharsets.UTF_8)));
+                }
+            } else {
+                if (applicationConfiguration.isDataEncryption()) {
+                    secret = SecretUtils.generateSecret();
+                }
+            }
 
             User user = new User();
             user.setDisplayName(this.display_name_value);
@@ -142,19 +159,12 @@ public class RegisterPage extends WebPage {
             user.setEmailAddress(this.email_address_value);
             user.setLogin(this.username_value);
             user.setLastSeen(new Date());
-            {
-                ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                KeysetWriter writer = JsonKeysetWriter.withOutputStream(stream);
-                aeadDekHandle.write(writer, kek);
-                user.setDek(stream.toString(StandardCharsets.UTF_8));
-            }
+            user.setDek(dek);
             user.setPassword(passwordEncryptor.encryptPassword(this.password_value));
             Map<String, Group> groups = new HashMap<>();
             groups.put(UUID.randomUUID().toString(), group);
             user.setGroups(groups);
             user.setAdmin(false);
-
-            String secret = Base64.getEncoder().withoutPadding().encodeToString(aeadDek.encrypt(SecretUtils.generateSecret().getBytes(StandardCharsets.UTF_8), "".getBytes(StandardCharsets.UTF_8)));
             user.setSecret(secret);
 
             user.setHomeDirectory(FilenameUtils.normalize(UUID.randomUUID().toString(), true));

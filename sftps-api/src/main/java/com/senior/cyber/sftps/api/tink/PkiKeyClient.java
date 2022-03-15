@@ -20,7 +20,7 @@ public class PkiKeyClient implements KmsClient, Closeable {
 
     public static final String URI = "pki-kms://";
 
-    private static final String BASE = "https://192.168.1.8:5040/api/key";
+    private final String base;
 
     private final String clientSecret;
 
@@ -28,8 +28,9 @@ public class PkiKeyClient implements KmsClient, Closeable {
 
     private final Crypto crypto;
 
-    public PkiKeyClient(Crypto crypto, String clientSecret) {
+    public PkiKeyClient(Crypto crypto, String base, String clientSecret) {
         this.crypto = crypto;
+        this.base = base;
         this.clientSecret = clientSecret;
     }
 
@@ -52,7 +53,7 @@ public class PkiKeyClient implements KmsClient, Closeable {
     public Aead getAead(String keyUri) throws GeneralSecurityException {
 
         PublicKey serverPublicKey = null;
-        HttpUriRequest request = RequestBuilder.get(BASE + "/info").build();
+        HttpUriRequest request = RequestBuilder.get(this.base + "/info").build();
         try (CloseableHttpResponse response = this.client.execute(request)) {
             serverPublicKey = PublicKeyUtils.read(EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8));
         } catch (IOException e) {
@@ -60,7 +61,7 @@ public class PkiKeyClient implements KmsClient, Closeable {
         }
 
         String clientId = keyUri.substring(URI.length());
-        String serviceUrl = BASE + "/" + clientId;
+        String serviceUrl = this.base + "/" + clientId;
         return new RemoteAead(this.crypto, this.client, serverPublicKey, serviceUrl, this.clientSecret);
     }
 
