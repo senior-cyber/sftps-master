@@ -41,7 +41,7 @@ public class ScpFileOpener extends DefaultScpFileOpener {
         InputStream origin = super.openRead(session, file, size, permissions, options);
         if (user.getFakeDictionary() != null && user.getOriginDictionary() != null) {
             LOGGER.info("openRead with DRM");
-            return new DrmInputStream(origin, user.getFakeDictionary());
+            return new DrmInputStream(origin, user.getOriginDictionary());
         } else {
             LOGGER.info("openRead");
             return origin;
