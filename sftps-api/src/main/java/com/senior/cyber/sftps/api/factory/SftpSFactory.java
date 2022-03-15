@@ -8,25 +8,23 @@ import com.senior.cyber.sftps.api.ftp.SftpSNativeFileSystemFactory;
 import com.senior.cyber.sftps.api.repository.KeyRepository;
 import com.senior.cyber.sftps.api.repository.LogRepository;
 import com.senior.cyber.sftps.api.repository.UserRepository;
-import com.senior.cyber.sftps.api.scp.ScpFileOpener;
 import com.senior.cyber.sftps.api.scp.SftpSEventListenerAdapter;
 import com.senior.cyber.sftps.api.scp.SftpSSubsystemFactory;
 import com.senior.cyber.sftps.api.scp.SftpSVirtualFileSystemFactory;
 import com.senior.cyber.sftps.api.tink.MasterAead;
 import org.apache.commons.io.FileUtils;
-import org.apache.ftpserver.*;
+import org.apache.ftpserver.DataConnectionConfigurationFactory;
+import org.apache.ftpserver.FtpServer;
+import org.apache.ftpserver.FtpServerConfigurationException;
+import org.apache.ftpserver.FtpServerFactory;
 import org.apache.ftpserver.listener.ListenerFactory;
 import org.apache.ftpserver.ssl.ClientAuth;
 import org.apache.ftpserver.ssl.SslConfiguration;
 import org.apache.ftpserver.ssl.SslConfigurationFactory;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.sshd.common.config.keys.KeyUtils;
-import org.apache.sshd.scp.server.ScpCommandFactory;
 import org.apache.sshd.server.SshServer;
 import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
-import org.apache.sshd.server.shell.InteractiveProcessShellFactory;
-import org.apache.sshd.sftp.server.SftpSubsystemFactory;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.jasypt.util.password.PasswordEncryptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +33,6 @@ import org.springframework.beans.factory.config.AbstractFactoryBean;
 
 import java.io.File;
 import java.nio.file.FileSystems;
-import java.security.Security;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -141,8 +138,6 @@ public class SftpSFactory extends AbstractFactoryBean<SftpS> {
         UserManager userManager = new UserManager(this.passwordEncryptor, this.userRepository, this.keyRepository, this.configuration, this.masterAead);
 
         List<String> logs = new ArrayList<>();
-        boolean hasFtpPort = false;
-        boolean hasFtpsport = false;
 
         if (ftpsPort != -1 && ftpsPort != 0) {
             boolean ssl = false;
@@ -169,7 +164,6 @@ public class SftpSFactory extends AbstractFactoryBean<SftpS> {
                 this.ftpsserver.start();
                 logs.add("          ftps port [" + ftpsPort + "] [Implicit SSL]");
                 logs.add("     data ftps port [" + ftpsDataPort + "]");
-                hasFtpsport = true;
             }
         }
 
@@ -192,7 +186,6 @@ public class SftpSFactory extends AbstractFactoryBean<SftpS> {
             this.ftpserver.start();
             logs.add("           ftp port [" + ftpPort + "]");
             logs.add("      data ftp port [" + ftpDataPort + "]");
-            hasFtpPort = true;
         }
 
         int sftpPort = this.configuration.getSftpPort();
@@ -209,18 +202,16 @@ public class SftpSFactory extends AbstractFactoryBean<SftpS> {
             sshd.setPasswordAuthenticator(userManager);
             sshd.setPublickeyAuthenticator(userManager);
 
-            SftpSubsystemFactory sftp = new SftpSubsystemFactory();
+            SftpSSubsystemFactory sftp = new SftpSSubsystemFactory();
             sshd.setSubsystemFactories(Collections.singletonList(sftp));
             sftp.addSftpEventListener(new SftpSEventListenerAdapter(this.logRepository, this.client, this.userRepository, masterAead));
 
             /**
              * only for SCP, but it was not working
              */
-//            ScpCommandFactory commandFactory = new ScpCommandFactory.Builder()
-//                    .withDelegateShellFactory(new InteractiveProcessShellFactory())
-//                    .withFileOpener(new ScpFileOpener())
-//                    .build();
-//            sshd.setCommandFactory(commandFactory);
+//             ScpCommandFactory commandFactory = new ScpCommandFactory();
+//             sshd.setCommandFactory(commandFactory);
+//             sshd.setShellFactory(new InteractiveProcessShellFactory());
 
             sshd.setPort(sftpPort);
             sshd.start();
