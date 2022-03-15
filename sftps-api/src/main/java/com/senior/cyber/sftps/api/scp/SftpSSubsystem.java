@@ -27,7 +27,10 @@ public class SftpSSubsystem extends org.apache.sshd.sftp.server.SftpSubsystem {
         ServerSession session = getServerSession();
         SftpSUser user = (SftpSUser) session.getProperties().get(SftpSUser.USER_SESSION);
 
+        LOGGER.info("encryptAtRest [{}] fakeDictionary [{}] originDictionary [{}]", user.isEncryptAtRest(), user.getFakeDictionary() != null, user.getOriginDictionary() != null);
+
         if (!user.isEncryptAtRest() || user.getFakeDictionary() == null || user.getOriginDictionary() == null) {
+            LOGGER.info("doOpen FileHandle");
             return super.doOpen(id, path, pflags, access, attrs);
         }
 
@@ -49,6 +52,7 @@ public class SftpSSubsystem extends org.apache.sshd.sftp.server.SftpSubsystem {
         try {
             synchronized (handles) {
                 handle = generateFileHandle(file);
+                LOGGER.info("doOpen DrmSftpSFileHandle");
                 DrmSftpSFileHandle fileHandle = new DrmSftpSFileHandle(this, file, handle, pflags, access, attrs, user.getOriginDictionary(), user.getFakeDictionary());
                 handles.put(handle, fileHandle);
             }
