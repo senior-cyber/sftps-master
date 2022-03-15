@@ -190,7 +190,7 @@ public class UserManager implements org.apache.ftpserver.ftplet.UserManager, Pas
     }
 
     private SftpSUser authenticated(String userId, String userName, String keyId, String keyName, String userDisplayName, String black_secret, MasterAead masterAead, String dek, File homeDirectory, boolean encryptAtRest) throws GeneralSecurityException, IOException {
-        LOGGER.info("homeDirectory [{}]", homeDirectory.getAbsolutePath());
+        LOGGER.info("userName [{}] homeDirectory [{}]", userName, homeDirectory.getAbsolutePath());
         String white_secret = null;
         if (black_secret != null && !"".equals(black_secret)) {
             if (dek != null && !"".equals(dek)) {
@@ -199,10 +199,6 @@ public class UserManager implements org.apache.ftpserver.ftplet.UserManager, Pas
             } else {
                 white_secret = black_secret;
             }
-        }
-        LOGGER.info("encryptAtRest [{}]", encryptAtRest);
-        if (white_secret != null) {
-            LOGGER.info("white_secret [{}]", white_secret);
         }
         SftpSUser user = new SftpSUser(userId, keyId, keyName, userDisplayName, white_secret, encryptAtRest);
         user.setName(userName);

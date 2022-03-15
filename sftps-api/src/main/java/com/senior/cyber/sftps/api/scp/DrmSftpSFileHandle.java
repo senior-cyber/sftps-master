@@ -24,7 +24,6 @@ public class DrmSftpSFileHandle extends org.apache.sshd.sftp.server.FileHandle {
 
     @Override
     public void write(byte[] data, int doff, int length, long offset) throws IOException {
-        LOGGER.info("DrmSftpSFileHandle write");
         for (int i = doff; i < doff + length; i++) {
             data[i] = SecretUtils.translate(this.originDictionary, data[i]);
         }
@@ -33,12 +32,11 @@ public class DrmSftpSFileHandle extends org.apache.sshd.sftp.server.FileHandle {
 
     @Override
     public int read(byte[] data, int doff, int length, long offset, AtomicReference<Boolean> eof) throws IOException {
-        LOGGER.info("DrmSftpSFileHandle read");
         int read = super.read(data, doff, length, offset, eof);
         for (int i = doff; i < doff + length; i++) {
             data[i] = SecretUtils.translate(this.fakeDictionary, data[i]);
         }
         return read;
     }
-    
+
 }

@@ -26,10 +26,8 @@ public class ScpFileOpener extends DefaultScpFileOpener {
         SftpSUser user = (SftpSUser) serverSession.getProperties().get(SftpSUser.USER_SESSION);
         OutputStream origin = super.openWrite(session, file, size, permissions, options);
         if (user.getFakeDictionary() != null && user.getOriginDictionary() != null) {
-            LOGGER.info("openWrite with DRM");
             return new DrmOutputStream(origin, user.getOriginDictionary());
         } else {
-            LOGGER.info("openWrite");
             return origin;
         }
     }
@@ -40,10 +38,8 @@ public class ScpFileOpener extends DefaultScpFileOpener {
         SftpSUser user = (SftpSUser) serverSession.getProperties().get(SftpSUser.USER_SESSION);
         InputStream origin = super.openRead(session, file, size, permissions, options);
         if (user.getFakeDictionary() != null && user.getOriginDictionary() != null) {
-            LOGGER.info("openRead with DRM");
             return new DrmInputStream(origin, user.getFakeDictionary());
         } else {
-            LOGGER.info("openRead");
             return origin;
         }
     }
