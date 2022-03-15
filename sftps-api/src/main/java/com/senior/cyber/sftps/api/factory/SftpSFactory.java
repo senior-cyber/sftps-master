@@ -209,8 +209,7 @@ public class SftpSFactory extends AbstractFactoryBean<SftpS> {
             sshd.setPasswordAuthenticator(userManager);
             sshd.setPublickeyAuthenticator(userManager);
 
-            SftpSubsystemFactory sftp = new SftpSubsystemFactory.Builder()
-                    .build();
+            SftpSubsystemFactory sftp = new SftpSubsystemFactory();
             sshd.setSubsystemFactories(Collections.singletonList(sftp));
             sftp.addSftpEventListener(new SftpSEventListenerAdapter(this.logRepository, this.client, this.userRepository, masterAead));
 
@@ -219,7 +218,7 @@ public class SftpSFactory extends AbstractFactoryBean<SftpS> {
              */
             ScpCommandFactory commandFactory = new ScpCommandFactory.Builder()
                     .withDelegateShellFactory(new InteractiveProcessShellFactory())
-                    // .withFileOpener(new ScpFileOpener())
+                    .withFileOpener(new ScpFileOpener())
                     .build();
             sshd.setCommandFactory(commandFactory);
 
