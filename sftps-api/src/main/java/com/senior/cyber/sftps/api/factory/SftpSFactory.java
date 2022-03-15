@@ -216,11 +216,11 @@ public class SftpSFactory extends AbstractFactoryBean<SftpS> {
             /**
              * only for SCP, but it was not working
              */
-            ScpCommandFactory commandFactory = new ScpCommandFactory.Builder()
-                    .withDelegateShellFactory(new InteractiveProcessShellFactory())
-                    .withFileOpener(new ScpFileOpener())
-                    .build();
-            sshd.setCommandFactory(commandFactory);
+//            ScpCommandFactory commandFactory = new ScpCommandFactory.Builder()
+//                    .withDelegateShellFactory(new InteractiveProcessShellFactory())
+//                    .withFileOpener(new ScpFileOpener())
+//                    .build();
+//            sshd.setCommandFactory(commandFactory);
 
             sshd.setPort(sftpPort);
             sshd.start();
