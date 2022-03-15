@@ -53,7 +53,7 @@ dependencies {
 
     implementation "org.apache.sshd:sshd-core:${sshd}"
     implementation "org.apache.sshd:sshd-sftp:${sshd}"
-    // implementation "org.apache.sshd:sshd-scp:${sshd}"
+    implementation "org.apache.sshd:sshd-scp:${sshd}"
 
     implementation "org.reflections:reflections:${reflections}"
     implementation "commons-beanutils:commons-beanutils:${commons_beanutils}"

@@ -8,6 +8,7 @@ import com.senior.cyber.sftps.api.ftp.SftpSNativeFileSystemFactory;
 import com.senior.cyber.sftps.api.repository.KeyRepository;
 import com.senior.cyber.sftps.api.repository.LogRepository;
 import com.senior.cyber.sftps.api.repository.UserRepository;
+import com.senior.cyber.sftps.api.scp.ScpFileOpener;
 import com.senior.cyber.sftps.api.scp.SftpSEventListenerAdapter;
 import com.senior.cyber.sftps.api.scp.SftpSSubsystemFactory;
 import com.senior.cyber.sftps.api.scp.SftpSVirtualFileSystemFactory;
@@ -23,8 +24,10 @@ import org.apache.ftpserver.ssl.SslConfiguration;
 import org.apache.ftpserver.ssl.SslConfigurationFactory;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.sshd.common.config.keys.KeyUtils;
+import org.apache.sshd.scp.server.ScpCommandFactory;
 import org.apache.sshd.server.SshServer;
 import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
+import org.apache.sshd.server.shell.InteractiveProcessShellFactory;
 import org.jasypt.util.password.PasswordEncryptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -209,9 +212,10 @@ public class SftpSFactory extends AbstractFactoryBean<SftpS> {
             /**
              * only for SCP, but it was not working
              */
-//             ScpCommandFactory commandFactory = new ScpCommandFactory();
-//             sshd.setCommandFactory(commandFactory);
-//             sshd.setShellFactory(new InteractiveProcessShellFactory());
+            ScpCommandFactory commandFactory = new ScpCommandFactory();
+            commandFactory.setScpFileOpener(new ScpFileOpener());
+            sshd.setCommandFactory(commandFactory);
+            sshd.setShellFactory(new InteractiveProcessShellFactory());
 
             sshd.setPort(sftpPort);
             sshd.start();
