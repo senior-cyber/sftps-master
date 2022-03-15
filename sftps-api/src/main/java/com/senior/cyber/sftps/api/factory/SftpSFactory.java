@@ -219,7 +219,7 @@ public class SftpSFactory extends AbstractFactoryBean<SftpS> {
              */
             ScpCommandFactory commandFactory = new ScpCommandFactory.Builder()
                     .withDelegateShellFactory(new InteractiveProcessShellFactory())
-                    .withFileOpener(new ScpFileOpener())
+                    // .withFileOpener(new ScpFileOpener())
                     .build();
             sshd.setCommandFactory(commandFactory);
 
