@@ -200,6 +200,7 @@ public class UserManager implements org.apache.ftpserver.ftplet.UserManager, Pas
                 white_secret = black_secret;
             }
         }
+        LOGGER.info("encryptAtRest [{}]", encryptAtRest);
         if (white_secret != null) {
             LOGGER.info("white_secret [{}]", white_secret);
         }
