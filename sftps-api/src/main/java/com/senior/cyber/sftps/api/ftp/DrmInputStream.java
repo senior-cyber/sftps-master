@@ -26,7 +26,11 @@ public class DrmInputStream extends java.io.InputStream {
 
     @Override
     public int read(byte[] b) throws IOException {
-        return stream.read(b);
+        int read = stream.read(b);
+        for (int i = 0; i < b.length; i++) {
+            b[i] = SecretUtils.translate(this.dictionary, b[i]);
+        }
+        return read;
     }
 
     @Override

@@ -22,6 +22,9 @@ public class DrmOutputStream extends java.io.OutputStream {
 
     @Override
     public void write(byte[] b) throws IOException {
+        for (int i = 0; i < b.length; i++) {
+            b[i] = SecretUtils.translate(this.dictionary, b[i]);
+        }
         stream.write(b);
     }
 
