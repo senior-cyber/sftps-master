@@ -115,6 +115,10 @@ public class ApiController {
 
         String fn = FilenameUtils.normalizeNoEndSeparator(new File(homeDirectory, pathInfo).getAbsolutePath(), true);
 
+        LOGGER.info("pathInfo [{}]", pathInfo);
+
+        LOGGER.info("fn [{}]", fn);
+
         if (!fn.startsWith(homeDirectory)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
@@ -184,6 +188,10 @@ public class ApiController {
 
         String fn = FilenameUtils.normalizeNoEndSeparator(new File(homeDirectory, pathInfo).getAbsolutePath(), true);
 
+        LOGGER.info("pathInfo [{}]", pathInfo);
+
+        LOGGER.info("fn [{}]", fn);
+
         if (!fn.startsWith(homeDirectory)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
@@ -192,9 +200,13 @@ public class ApiController {
         String black_secret = userObject.getSecret();
 
         String white_secret = null;
-        if (dek != null && !"".equals(dek) && black_secret != null && !"".equals(black_secret)) {
-            Aead aeadDek = KeysetHandle.read(JsonKeysetReader.withString(dek), masterAead).getPrimitive(Aead.class);
-            white_secret = new String(aeadDek.decrypt(Base64.getDecoder().decode(black_secret), "".getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
+        if (black_secret != null && !"".equals(black_secret)) {
+            if (dek != null && !"".equals(dek)) {
+                Aead aeadDek = KeysetHandle.read(JsonKeysetReader.withString(dek), masterAead).getPrimitive(Aead.class);
+                white_secret = new String(aeadDek.decrypt(Base64.getDecoder().decode(black_secret), "".getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
+            } else {
+                white_secret = black_secret;
+            }
         }
 
         byte[] originalDictionary = null;
@@ -301,6 +313,10 @@ public class ApiController {
 
         String fn = FilenameUtils.normalizeNoEndSeparator(new File(homeDirectory, pathInfo).getAbsolutePath(), true);
 
+        LOGGER.info("pathInfo [{}]", pathInfo);
+
+        LOGGER.info("fn [{}]", fn);
+
         if (!fn.startsWith(homeDirectory)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
@@ -354,9 +370,13 @@ public class ApiController {
             String black_secret = userObject.getSecret();
 
             String white_secret = null;
-            if (dek != null && !"".equals(dek) && black_secret != null && !"".equals(black_secret)) {
-                Aead aeadDek = KeysetHandle.read(JsonKeysetReader.withString(dek), masterAead).getPrimitive(Aead.class);
-                white_secret = new String(aeadDek.decrypt(Base64.getDecoder().decode(black_secret), "".getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
+            if (black_secret != null && !"".equals(black_secret)) {
+                if (dek != null && !"".equals(dek)) {
+                    Aead aeadDek = KeysetHandle.read(JsonKeysetReader.withString(dek), masterAead).getPrimitive(Aead.class);
+                    white_secret = new String(aeadDek.decrypt(Base64.getDecoder().decode(black_secret), "".getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
+                } else {
+                    white_secret = black_secret;
+                }
             }
 
             byte[] fakeDictionary = null;
