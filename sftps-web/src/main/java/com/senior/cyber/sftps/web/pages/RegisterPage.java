@@ -166,7 +166,7 @@ public class RegisterPage extends WebPage {
             user.setGroups(groups);
             user.setAdmin(false);
             user.setSecret(secret);
-
+            user.setEncryptAtRest(secret != null && !"".equals(secret));
             user.setHomeDirectory(FilenameUtils.normalize(UUID.randomUUID().toString(), true));
             userRepository.save(user);
 
