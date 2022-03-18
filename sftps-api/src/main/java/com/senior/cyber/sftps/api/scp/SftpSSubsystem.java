@@ -25,12 +25,10 @@ public class SftpSSubsystem extends org.apache.sshd.sftp.server.SftpSubsystem {
     @Override
     protected String doOpen(int id, String path, int pflags, int access, Map<String, Object> attrs) throws IOException {
         ServerSession session = getServerSession();
+
         SftpSUser user = (SftpSUser) session.getProperties().get(SftpSUser.USER_SESSION);
 
-        LOGGER.info("encryptAtRest [{}] fakeDictionary [{}] originDictionary [{}]", user.isEncryptAtRest(), user.getFakeDictionary() != null, user.getOriginDictionary() != null);
-
         if (!user.isEncryptAtRest() || user.getFakeDictionary() == null || user.getOriginDictionary() == null) {
-            LOGGER.info("doOpen FileHandle");
             return super.doOpen(id, path, pflags, access, attrs);
         }
 
@@ -38,6 +36,7 @@ public class SftpSSubsystem extends org.apache.sshd.sftp.server.SftpSubsystem {
             log.debug("doOpen({})[id={}] SSH_FXP_OPEN (path={}, access=0x{}, pflags=0x{}, attrs={})",
                     session, id, path, Integer.toHexString(access), Integer.toHexString(pflags), attrs);
         }
+
         Path file = resolveFile(path);
         int curHandleCount = handles.size();
         int maxHandleCount = SftpModuleProperties.MAX_OPEN_HANDLES_PER_SESSION.getRequired(session);
@@ -52,7 +51,6 @@ public class SftpSSubsystem extends org.apache.sshd.sftp.server.SftpSubsystem {
         try {
             synchronized (handles) {
                 handle = generateFileHandle(file);
-                LOGGER.info("doOpen DrmSftpSFileHandle");
                 DrmSftpSFileHandle fileHandle = new DrmSftpSFileHandle(this, file, handle, pflags, access, attrs, user.getOriginDictionary(), user.getFakeDictionary());
                 handles.put(handle, fileHandle);
             }
