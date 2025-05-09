@@ -44,7 +44,7 @@ spring:
       enabled: true
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:mysql://192.168.1.53:33063/mysql_sftps
+    url: jdbc:mysql://192.168.1.53:33063/sftps
     username: root
     password: 123123a
   jackson:
