@@ -1,6 +1,5 @@
 package com.senior.cyber.sftps.web.pages.group;
 
-import com.senior.cyber.sftps.dao.entity.Group;
 import com.senior.cyber.sftps.web.repository.GroupRepository;
 import com.senior.cyber.sftps.web.validator.GroupNameValidator;
 import com.senior.cyber.frmk.common.base.WicketFactory;

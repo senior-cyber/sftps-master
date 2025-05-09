@@ -1,6 +1,5 @@
 package com.senior.cyber.sftps.web.repository;
 
-import com.senior.cyber.sftps.dao.entity.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

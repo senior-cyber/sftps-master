@@ -1,8 +1,8 @@
 package com.senior.cyber.sftps.api.tink;
 
-import com.senior.cyber.frmk.common.crypto.AESGCMBlockCipher;
-import com.senior.cyber.frmk.common.crypto.IESCipherGCM;
-import com.senior.cyber.frmk.common.crypto.IESEngineGCM;
+import com.senior.cyber.sftps.crypto.AESGCMBlockCipher;
+import com.senior.cyber.sftps.crypto.IESCipherGCM;
+import com.senior.cyber.sftps.crypto.IESEngineGCM;
 import org.bouncycastle.crypto.agreement.ECDHBasicAgreement;
 import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.crypto.generators.KDF2BytesGenerator;
@@ -32,7 +32,7 @@ public class Crypto {
         this.keySize = 256;
     }
 
-    public String decrypt(PrivateKey privateKey, String text) throws BadPaddingException, IllegalBlockSizeException, NoSuchPaddingException, NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException, InvalidKeyException {
+    public String decrypt(PrivateKey privateKey, String text) throws BadPaddingException, IllegalBlockSizeException, InvalidAlgorithmParameterException, InvalidKeyException {
         IESCipherGCM cipher = new IESCipherGCM(new IESEngineGCM(new ECDHBasicAgreement(), new KDF2BytesGenerator(new SHA256Digest()), new AESGCMBlockCipher()), this.tagLength);
         cipher.engineInit(Cipher.DECRYPT_MODE, privateKey, new IESParameterSpec(null, null, 128, 128, null), this.secureRandom);
         byte[] data = Base64.getDecoder().decode(text);
@@ -57,7 +57,7 @@ public class Crypto {
         return Base64.getEncoder().encodeToString(iv) + "." + Base64.getEncoder().encodeToString(cipher.doFinal(text.getBytes(StandardCharsets.UTF_8)));
     }
 
-    public String encrypt(PublicKey publicKey, String text) throws IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, NoSuchProviderException {
+    public String encrypt(PublicKey publicKey, String text) throws IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException,   InvalidKeyException {
         IESCipherGCM cipher = new IESCipherGCM(new IESEngineGCM(new ECDHBasicAgreement(), new KDF2BytesGenerator(new SHA256Digest()), new AESGCMBlockCipher()), this.tagLength);
         cipher.engineInit(Cipher.ENCRYPT_MODE, publicKey, new IESParameterSpec(null, null, 128, 128, null), this.secureRandom);
         byte[] data = text.getBytes(StandardCharsets.UTF_8);

@@ -1,0 +1,25 @@
+services:
+  mysql-dropbox:
+    container_name: mysql-sftps
+    image: docker.io/bitnami/mysql:9.0
+    restart: 'always'
+    ports:
+      - '33063:3306'
+    volumes:
+      - 'mysql-sftps:/bitnami/mysql/data'
+    environment:
+      # ALLOW_EMPTY_PASSWORD is recommended only for development.
+      - ALLOW_EMPTY_PASSWORD=no
+      - MYSQL_DATABASE=mysql_sftps
+      - MYSQL_ROOT_USER=root
+      - MYSQL_ROOT_PASSWORD=123123a
+    healthcheck:
+      test: [ 'CMD', '/opt/bitnami/scripts/mysql/healthcheck.sh' ]
+      interval: 15s
+      timeout: 5s
+      retries: 6
+
+volumes:
+  mysql-sftps:
+    name: mysql-sftps
+    driver: local

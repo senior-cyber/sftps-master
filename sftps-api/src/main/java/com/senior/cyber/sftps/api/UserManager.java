@@ -3,15 +3,15 @@ package com.senior.cyber.sftps.api;
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.JsonKeysetReader;
 import com.google.crypto.tink.KeysetHandle;
-import com.senior.cyber.frmk.common.pki.CertificateUtils;
-import com.senior.cyber.frmk.common.pki.PublicKeyUtils;
-import com.senior.cyber.sftps.api.configuration.ApplicationConfiguration;
+import com.senior.cyber.sftps.api.configuration.AppConfig;
 import com.senior.cyber.sftps.api.dto.SftpSUser;
-import com.senior.cyber.sftps.api.repository.KeyRepository;
-import com.senior.cyber.sftps.api.repository.UserRepository;
 import com.senior.cyber.sftps.api.tink.MasterAead;
-import com.senior.cyber.sftps.dao.entity.Key;
-import com.senior.cyber.sftps.dao.entity.User;
+import com.senior.cyber.sftps.dao.entity.rbac.User;
+import com.senior.cyber.sftps.dao.entity.sftps.Key;
+import com.senior.cyber.sftps.dao.repository.rbac.UserRepository;
+import com.senior.cyber.sftps.dao.repository.sftps.KeyRepository;
+import com.senior.cyber.sftps.x509.CertificateUtils;
+import com.senior.cyber.sftps.x509.PublicKeyUtils;
 import org.apache.ftpserver.ftplet.Authentication;
 import org.apache.ftpserver.ftplet.AuthenticationFailedException;
 import org.apache.ftpserver.ftplet.Authority;
@@ -41,7 +41,6 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
-import java.util.Optional;
 
 public class UserManager implements org.apache.ftpserver.ftplet.UserManager, PasswordAuthenticator, PublickeyAuthenticator {
 
@@ -53,11 +52,11 @@ public class UserManager implements org.apache.ftpserver.ftplet.UserManager, Pas
 
     private final PasswordEncryptor passwordEncryptor;
 
-    private final ApplicationConfiguration configuration;
+    private final AppConfig configuration;
 
     private final MasterAead masterAead;
 
-    public UserManager(PasswordEncryptor passwordEncryptor, UserRepository userRepository, KeyRepository keyRepository, ApplicationConfiguration configuration, MasterAead masterAead) {
+    public UserManager(PasswordEncryptor passwordEncryptor, UserRepository userRepository, KeyRepository keyRepository, AppConfig configuration, MasterAead masterAead) {
         this.userRepository = userRepository;
         this.keyRepository = keyRepository;
         this.passwordEncryptor = passwordEncryptor;
@@ -68,8 +67,10 @@ public class UserManager implements org.apache.ftpserver.ftplet.UserManager, Pas
     @Override
     public org.apache.ftpserver.ftplet.User getUserByName(String username) throws FtpException {
         try {
-            Optional<User> optionalUser = this.userRepository.findByLogin(username);
-            User userObject = optionalUser.orElseThrow(() -> new FtpException(username + " is not found"));
+            User userObject = this.userRepository.findByLogin(username);
+            if (userObject == null) {
+                throw new FtpException(username + " is not found");
+            }
 
             String dek = userObject.getDek();
 
@@ -131,8 +132,10 @@ public class UserManager implements org.apache.ftpserver.ftplet.UserManager, Pas
                 throw new AuthenticationFailedException("Authentication failed");
             }
 
-            Optional<User> optionalUser = this.userRepository.findByLogin(login);
-            User userObject = optionalUser.orElseThrow(() -> new AuthenticationFailedException("Authentication failed"));
+            User userObject = this.userRepository.findByLogin(login);
+            if (userObject == null) {
+                throw new AuthenticationFailedException("Authentication failed");
+            }
 
             if (!userObject.isEnabled()) {
                 throw new AuthenticationFailedException("Authentication failed");
@@ -236,8 +239,7 @@ public class UserManager implements org.apache.ftpserver.ftplet.UserManager, Pas
     @Override
     public boolean authenticate(String username, PublicKey password, ServerSession session) throws AsyncAuthException {
         try {
-            Optional<User> optionalUser = this.userRepository.findByLogin(username);
-            User userObject = optionalUser.orElse(null);
+            User userObject = this.userRepository.findByLogin(username);
             if (userObject == null || !userObject.isEnabled()) {
                 return false;
             }
@@ -290,8 +292,7 @@ public class UserManager implements org.apache.ftpserver.ftplet.UserManager, Pas
     @Override
     public boolean authenticate(String username, String password, ServerSession session) throws PasswordChangeRequiredException, AsyncAuthException {
         try {
-            Optional<User> optionalUser = this.userRepository.findByLogin(username);
-            User userObject = optionalUser.orElse(null);
+            User userObject = this.userRepository.findByLogin(username);
             if (userObject == null || !userObject.isEnabled()) {
                 return false;
             }

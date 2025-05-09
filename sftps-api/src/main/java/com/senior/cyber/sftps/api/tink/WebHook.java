@@ -1,24 +1,16 @@
 package com.senior.cyber.sftps.api.tink;
 
-import com.senior.cyber.sftps.api.dto.SftpSUser;
-import com.senior.cyber.sftps.api.repository.UserRepository;
-import com.senior.cyber.sftps.dao.entity.Key;
-import com.senior.cyber.sftps.dao.entity.Log;
-import com.senior.cyber.sftps.dao.entity.User;
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.JsonKeysetReader;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.senior.cyber.sftps.api.dto.SftpSUser;
+import com.senior.cyber.sftps.dao.entity.rbac.User;
+import com.senior.cyber.sftps.dao.entity.sftps.Key;
+import com.senior.cyber.sftps.dao.entity.sftps.Log;
+import com.senior.cyber.sftps.dao.repository.rbac.UserRepository;
 import org.apache.commons.lang3.time.DateFormatUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.methods.RequestBuilder;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.util.EntityUtils;
-import org.apache.wicket.WicketRuntimeException;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +20,10 @@ import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
@@ -45,7 +41,7 @@ public class WebHook {
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-    public static void report(CloseableHttpClient client, UserRepository userRepository, MasterAead masterAead, Log log, User user, Long keyId, String keyName) {
+    public static void report(HttpClient client, UserRepository userRepository, MasterAead masterAead, Log log, User user, String keyId, String keyName) {
         if (user.isWebhookEnabled() && user.getWebhookUrl() != null && !"".equals(user.getWebhookUrl())) {
             Map<String, Object> gson = new HashMap<>();
             gson.put("when", DateFormatUtils.ISO_8601_EXTENDED_DATETIME_TIME_ZONE_FORMAT.format(log.getCreatedAt()));
@@ -77,7 +73,7 @@ public class WebHook {
                     byte[] secret = aeadDek.decrypt(Base64.getDecoder().decode(user.getWebhookSecret()), "".getBytes(StandardCharsets.UTF_8));
                     secret_value = new String(secret, StandardCharsets.UTF_8);
                 } catch (GeneralSecurityException e) {
-                    throw new WicketRuntimeException(e);
+                    throw new RuntimeException(e);
                 }
             } else {
                 secret_value = user.getWebhookSecret();
@@ -103,28 +99,27 @@ public class WebHook {
                 }
             }
 
-            StringEntity entity = new StringEntity(json, ContentType.create("application/json", StandardCharsets.UTF_8));
-            HttpUriRequest request = null;
+            var requestBuilder = HttpRequest.newBuilder();
             if (signature == null || "".equals(signature)) {
                 LOGGER.info("X-SftpS-Event [{}]", log.getEventType());
-                request = RequestBuilder.post(user.getWebhookUrl())
-                        .setHeader("X-SftpS-Event", log.getEventType())
-                        .setEntity(entity).build();
+                requestBuilder.header("X-SftpS-Event", log.getEventType().name());
             } else {
                 LOGGER.info("X-SftpS-Event [{}] X-SftpS-Signature [{}]", log.getEventType(), signature);
-                request = RequestBuilder.post(user.getWebhookUrl())
-                        .setHeader("X-SftpS-Event", log.getEventType())
-                        .setHeader("X-SftpS-Signature", signature)
-                        .setEntity(entity).build();
+                requestBuilder.header("X-SftpS-Event", log.getEventType().name());
+                requestBuilder.header("X-SftpS-Signature", signature);
             }
-            try (CloseableHttpResponse response = client.execute(request)) {
-                EntityUtils.consumeQuietly(response.getEntity());
-            } catch (IOException e) {
+            requestBuilder.header("Content-Type", "application/json");
+            requestBuilder.POST(HttpRequest.BodyPublishers.ofString(json, StandardCharsets.UTF_8));
+            requestBuilder.uri(URI.create(user.getWebhookUrl()));
+            var request = requestBuilder.build();
+            try {
+                HttpResponse<Void> response = client.send(request, HttpResponse.BodyHandlers.discarding());
+            } catch (IOException | InterruptedException e) {
             }
         }
     }
 
-    public static void report(CloseableHttpClient client, UserRepository userRepository, MasterAead masterAead, Log log, User user, Key key) {
+    public static void report(HttpClient client, UserRepository userRepository, MasterAead masterAead, Log log, User user, Key key) {
         if (key == null) {
             report(client, userRepository, masterAead, log, user, null, null);
         } else {
@@ -132,10 +127,10 @@ public class WebHook {
         }
     }
 
-    public static void report(CloseableHttpClient client, UserRepository userRepository, MasterAead masterAead, Log log, SftpSUser sftpsUser) {
-        Optional<User> optionalUser = userRepository.findById(Long.valueOf(sftpsUser.getUserId()));
+    public static void report(HttpClient client, UserRepository userRepository, MasterAead masterAead, Log log, SftpSUser sftpsUser) {
+        Optional<User> optionalUser = userRepository.findById(sftpsUser.getUserId());
         User user = optionalUser.orElseThrow();
-        report(client, userRepository, masterAead, log, user, sftpsUser.getKeyId() == null || "".equals(sftpsUser.getKeyId()) ? null : Long.parseLong(sftpsUser.getKeyId()), sftpsUser.getKeyName());
+        report(client, userRepository, masterAead, log, user, sftpsUser.getKeyId() == null || "".equals(sftpsUser.getKeyId()) ? null : sftpsUser.getKeyId(), sftpsUser.getKeyName());
     }
 
 }

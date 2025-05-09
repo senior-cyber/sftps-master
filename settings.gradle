@@ -1,10 +1,12 @@
 rootProject.name = 'sftps-master'
 
 include(
+        ":sftps-api",
         ":sftps-dao",
-        ":sftps-web",
-        ":sftps-api"
+        ":sftps-x509"
+//        ":sftps-web"
 )
-project(":sftps-dao").projectDir = file("./sftps-dao")
-project(":sftps-web").projectDir = file("./sftps-web")
 project(":sftps-api").projectDir = file("./sftps-api")
+project(":sftps-dao").projectDir = file("./sftps-dao")
+project(":sftps-x509").projectDir = file("./sftps-x509")
+//project(":sftps-web").projectDir = file("./sftps-web")

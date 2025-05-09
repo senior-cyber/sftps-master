@@ -1,7 +1,5 @@
 package com.senior.cyber.sftps.web.provider;
 
-import com.senior.cyber.sftps.dao.entity.Role;
-import com.senior.cyber.sftps.dao.entity.User;
 import com.senior.cyber.sftps.web.BootApplication;
 import com.senior.cyber.sftps.web.factory.WebSession;
 import com.senior.cyber.sftps.web.pages.LogPage;

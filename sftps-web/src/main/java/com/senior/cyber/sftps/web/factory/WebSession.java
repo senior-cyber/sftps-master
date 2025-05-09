@@ -1,8 +1,5 @@
 package com.senior.cyber.sftps.web.factory;
 
-import com.senior.cyber.sftps.dao.entity.Role;
-import com.senior.cyber.sftps.dao.entity.Session;
-import com.senior.cyber.sftps.dao.entity.User;
 import com.senior.cyber.sftps.web.repository.HSessionRepository;
 import com.senior.cyber.sftps.web.repository.UserRepository;
 import com.senior.cyber.sftps.web.utility.RoleUtility;

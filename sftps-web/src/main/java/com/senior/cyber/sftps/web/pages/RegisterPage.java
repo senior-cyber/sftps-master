@@ -5,8 +5,6 @@ import com.senior.cyber.frmk.common.base.AdminLTEResourceReference;
 import com.senior.cyber.frmk.common.base.Bookmark;
 import com.senior.cyber.frmk.common.base.WicketFactory;
 import com.senior.cyber.frmk.common.wicket.markup.html.panel.ComponentFeedbackPanel;
-import com.senior.cyber.sftps.dao.entity.Group;
-import com.senior.cyber.sftps.dao.entity.User;
 import com.senior.cyber.sftps.web.SecretUtils;
 import com.senior.cyber.sftps.web.configuration.ApplicationConfiguration;
 import com.senior.cyber.sftps.web.repository.GroupRepository;

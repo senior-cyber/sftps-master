@@ -1,6 +1,5 @@
 package com.senior.cyber.sftps.web.validator;
 
-import com.senior.cyber.sftps.dao.entity.Group;
 import com.senior.cyber.sftps.web.repository.GroupRepository;
 import com.senior.cyber.frmk.common.base.WicketFactory;
 import org.apache.wicket.validation.IValidatable;

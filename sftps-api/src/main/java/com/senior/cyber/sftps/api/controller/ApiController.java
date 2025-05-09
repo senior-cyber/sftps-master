@@ -4,25 +4,28 @@ package com.senior.cyber.sftps.api.controller;
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.JsonKeysetReader;
 import com.google.crypto.tink.KeysetHandle;
-import com.senior.cyber.frmk.common.function.HttpExtension;
-import com.senior.cyber.frmk.common.pki.CertificateUtils;
-import com.senior.cyber.frmk.common.pki.PublicKeyUtils;
+import com.senior.cyber.sftps.api.HttpExtension;
 import com.senior.cyber.sftps.api.SecretUtils;
-import com.senior.cyber.sftps.api.configuration.ApplicationConfiguration;
-import com.senior.cyber.sftps.api.repository.KeyRepository;
-import com.senior.cyber.sftps.api.repository.LogRepository;
-import com.senior.cyber.sftps.api.repository.UserRepository;
+import com.senior.cyber.sftps.api.configuration.AppConfig;
 import com.senior.cyber.sftps.api.tink.MasterAead;
 import com.senior.cyber.sftps.api.tink.WebHook;
-import com.senior.cyber.sftps.dao.entity.Key;
-import com.senior.cyber.sftps.dao.entity.Log;
-import com.senior.cyber.sftps.dao.entity.User;
+import com.senior.cyber.sftps.dao.entity.rbac.User;
+import com.senior.cyber.sftps.dao.enums.EventTypeEnum;
+import com.senior.cyber.sftps.dao.entity.sftps.Key;
+import com.senior.cyber.sftps.dao.entity.sftps.Log;
+import com.senior.cyber.sftps.dao.repository.rbac.UserRepository;
+import com.senior.cyber.sftps.dao.repository.sftps.KeyRepository;
+import com.senior.cyber.sftps.dao.repository.sftps.LogRepository;
+import com.senior.cyber.sftps.x509.CertificateUtils;
+import com.senior.cyber.sftps.x509.PublicKeyUtils;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.jasypt.util.password.PasswordEncryptor;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
@@ -32,11 +35,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.io.*;
 import java.net.URLDecoder;
+import java.net.http.HttpClient;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
@@ -68,10 +69,10 @@ public class ApiController {
     protected MasterAead masterAead;
 
     @Autowired
-    protected CloseableHttpClient client;
+    protected HttpClient client;
 
     @Autowired
-    protected ApplicationConfiguration applicationConfiguration;
+    protected AppConfig applicationConfiguration;
 
     @DeleteMapping(path = "/**")
     public void delete(@RequestHeader(value = "Authorization", required = false) String authorization, HttpServletRequest request, HttpServletResponse response) throws CertificateException, IOException {
@@ -79,10 +80,10 @@ public class ApiController {
 
         HttpSession session = request.getSession(true);
 
-        Optional<User> optionalUser = this.userRepository.findById((long) session.getAttribute(USER_ID));
+        Optional<User> optionalUser = this.userRepository.findById((String) session.getAttribute(USER_ID));
         Key key = null;
         if (session.getAttribute(KEY_ID) != null) {
-            Optional<Key> optionalKey = this.keyRepository.findById((long) session.getAttribute(KEY_ID));
+            Optional<Key> optionalKey = this.keyRepository.findById((String) session.getAttribute(KEY_ID));
             key = optionalKey.orElse(null);
         }
 
@@ -133,7 +134,7 @@ public class ApiController {
 
         Log log = new Log();
         log.setCreatedAt(new Date());
-        log.setEventType("Deleted");
+        log.setEventType(EventTypeEnum.Deleted);
         log.setUserDisplayName(userObject.getDisplayName());
         if (key != null) {
             log.setKeyName(key.getName());
@@ -152,10 +153,10 @@ public class ApiController {
 
         HttpSession session = request.getSession(true);
 
-        Optional<User> optionalUser = this.userRepository.findById((long) session.getAttribute(USER_ID));
+        Optional<User> optionalUser = this.userRepository.findById((String) session.getAttribute(USER_ID));
         Key key = null;
         if (session.getAttribute(KEY_ID) != null) {
-            Optional<Key> optionalKey = this.keyRepository.findById((long) session.getAttribute(KEY_ID));
+            Optional<Key> optionalKey = this.keyRepository.findById((String) session.getAttribute(KEY_ID));
             key = optionalKey.orElse(null);
         }
 
@@ -201,8 +202,8 @@ public class ApiController {
         String black_secret = userObject.getSecret();
 
         String white_secret = null;
-        if (black_secret != null && !"".equals(black_secret)) {
-            if (dek != null && !"".equals(dek)) {
+        if (black_secret != null && !black_secret.isEmpty()) {
+            if (dek != null && !dek.isEmpty()) {
                 Aead aeadDek = KeysetHandle.read(JsonKeysetReader.withString(dek), masterAead).getPrimitive(Aead.class);
                 white_secret = new String(aeadDek.decrypt(Base64.getDecoder().decode(black_secret), "".getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
             } else {
@@ -233,7 +234,7 @@ public class ApiController {
 
         Log log = new Log();
         log.setCreatedAt(new Date());
-        log.setEventType("Uploaded");
+        log.setEventType(EventTypeEnum.Uploaded);
         log.setUserDisplayName(userObject.getDisplayName());
         if (key != null) {
             log.setKeyName(key.getName());
@@ -277,10 +278,10 @@ public class ApiController {
 
         HttpSession session = request.getSession(true);
 
-        Optional<User> optionalUser = this.userRepository.findById((long) session.getAttribute(USER_ID));
+        Optional<User> optionalUser = this.userRepository.findById((String) session.getAttribute(USER_ID));
         Key key = null;
         if (session.getAttribute(KEY_ID) != null) {
-            Optional<Key> optionalKey = this.keyRepository.findById((long) session.getAttribute(KEY_ID));
+            Optional<Key> optionalKey = this.keyRepository.findById((String) session.getAttribute(KEY_ID));
             key = optionalKey.orElse(null);
         }
 
@@ -371,8 +372,8 @@ public class ApiController {
             String black_secret = userObject.getSecret();
 
             String white_secret = null;
-            if (black_secret != null && !"".equals(black_secret)) {
-                if (dek != null && !"".equals(dek)) {
+            if (black_secret != null && !black_secret.isEmpty()) {
+                if (dek != null && !dek.isEmpty()) {
                     Aead aeadDek = KeysetHandle.read(JsonKeysetReader.withString(dek), masterAead).getPrimitive(Aead.class);
                     white_secret = new String(aeadDek.decrypt(Base64.getDecoder().decode(black_secret), "".getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
                 } else {
@@ -403,7 +404,7 @@ public class ApiController {
             }
             Log log = new Log();
             log.setCreatedAt(new Date());
-            log.setEventType("Downloaded");
+            log.setEventType(EventTypeEnum.Downloaded);
             log.setUserDisplayName(userObject.getDisplayName());
             if (key != null) {
                 log.setKeyName(key.getName());
@@ -418,9 +419,9 @@ public class ApiController {
     protected void authentication(String authorization, HttpServletRequest request, HttpServletResponse response) throws IOException, CertificateException {
         HttpSession session = request.getSession(true);
         if (session.getAttribute(USER_ID) == null) {
-            Long userId = null;
-            Long keyId = null;
-            if (authorization == null || "".equals(authorization)) {
+            String userId = null;
+            String keyId = null;
+            if (authorization == null || authorization.isEmpty()) {
                 response.setHeader("WWW-Authenticate", "Basic realm=\"Authentication\"");
                 throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
             }
@@ -447,18 +448,16 @@ public class ApiController {
             String login = StringUtils.substring(login_pwd, 0, colon);
             String pwd = StringUtils.substring(login_pwd, colon + 1);
 
-            if ("".equals(pwd) && certificate == null) {
+            if (pwd.isEmpty() && certificate == null) {
                 response.setHeader("WWW-Authenticate", "Basic realm=\"Authentication\"");
                 throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
             }
 
-            Optional<User> optionalUser = this.userRepository.findByLogin(login);
-            if (optionalUser.isEmpty()) {
+            User userObject = this.userRepository.findByLogin(login);
+            if (userObject == null) {
                 response.setHeader("WWW-Authenticate", "Basic realm=\"Authentication\"");
                 throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
             }
-
-            User userObject = optionalUser.orElse(null);
 
             if (!userObject.isEnabled()) {
                 response.setHeader("WWW-Authenticate", "Basic realm=\"Authentication\"");
@@ -469,7 +468,7 @@ public class ApiController {
 
             userId = userObject.getId();
 
-            if (!"".equals(pwd)) {
+            if (!pwd.isEmpty()) {
                 if (this.passwordEncryptor.checkPassword(pwd, userObject.getPassword())) {
                     userObject.setLastSeen(LocalDate.now().toDate());
                     userRepository.save(userObject);

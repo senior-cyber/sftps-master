@@ -1,7 +1,5 @@
 package com.senior.cyber.sftps.web.pages.group;
 
-import com.senior.cyber.sftps.dao.entity.Group;
-import com.senior.cyber.sftps.dao.entity.Role;
 import com.senior.cyber.sftps.web.MasterPage;
 import com.senior.cyber.sftps.web.data.MultipleChoiceProvider;
 import com.senior.cyber.sftps.web.data.MySqlDataProvider;

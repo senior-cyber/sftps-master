@@ -1,6 +1,5 @@
 package com.senior.cyber.sftps.web.pages.my.profile;
 
-import com.senior.cyber.sftps.dao.entity.User;
 import com.senior.cyber.sftps.web.factory.WebSession;
 import com.senior.cyber.sftps.web.repository.UserRepository;
 import com.senior.cyber.frmk.common.base.WicketFactory;

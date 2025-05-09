@@ -1,17 +1,15 @@
 package com.senior.cyber.sftps.api.tink;
 
 import com.google.crypto.tink.Aead;
-import com.senior.cyber.frmk.common.pki.PublicKeyUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.methods.RequestBuilder;
-import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.util.EntityUtils;
+import com.senior.cyber.sftps.x509.PublicKeyUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import javax.crypto.SecretKey;
 import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.interfaces.ECPrivateKey;
@@ -24,7 +22,7 @@ public class RemoteAead implements Aead {
 
     private final String clientSecret;
 
-    private final CloseableHttpClient client;
+    private final HttpClient client;
 
     private final PublicKey serverPublicKey;
 
@@ -32,7 +30,7 @@ public class RemoteAead implements Aead {
 
     private final Crypto crypto;
 
-    public RemoteAead(Crypto crypto, CloseableHttpClient client, PublicKey serverPublicKey, String serviceUrl, String clientSecret) throws NoSuchAlgorithmException, NoSuchProviderException {
+    public RemoteAead(Crypto crypto, HttpClient client, PublicKey serverPublicKey, String serviceUrl, String clientSecret) throws NoSuchAlgorithmException, NoSuchProviderException {
         this.client = client;
         this.serverPublicKey = serverPublicKey;
         this.serviceUrl = serviceUrl;
@@ -52,19 +50,21 @@ public class RemoteAead implements Aead {
             throw new GeneralSecurityException(e);
         }
         SecretKey secret = this.crypto.lookupKeyAgreement((ECPrivateKey) this.clientKey.getPrivate(), (ECPublicKey) this.serverPublicKey);
-        HttpUriRequest request = RequestBuilder.post().setUri(this.serviceUrl + "/encrypt")
-                .setHeader("Client-Secret", this.clientSecret)
-                .setHeader("Public-Key", clientPublicKey)
-                .setEntity(new ByteArrayEntity(this.crypto.encrypt(secret, Base64.getEncoder().encodeToString(plaintext)).getBytes(StandardCharsets.UTF_8)))
-                .build();
-        try (CloseableHttpResponse response = client.execute(request)) {
-            if (response.getStatusLine().getStatusCode() == 200) {
-                return Base64.getDecoder().decode(this.crypto.decrypt(secret, EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8)));
+        var builder = HttpRequest.newBuilder(URI.create(this.serviceUrl + "/encrypt"));
+        builder.setHeader("Client-Secret", this.clientSecret);
+        builder.setHeader("Public-Key", clientPublicKey);
+        builder.POST(HttpRequest.BodyPublishers.ofByteArray(this.crypto.encrypt(secret, Base64.getEncoder().encodeToString(plaintext)).getBytes(StandardCharsets.UTF_8)));
+        var request = builder.build();
+
+        try {
+            HttpResponse<String> response = this.client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+            if (response.statusCode() == 200) {
+                return Base64.getDecoder().decode(this.crypto.decrypt(secret, response.body()));
             } else {
                 throw new GeneralSecurityException("encryption error");
             }
 
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             throw new GeneralSecurityException(e);
         }
     }
@@ -79,18 +79,20 @@ public class RemoteAead implements Aead {
         }
         SecretKey secret = this.crypto.lookupKeyAgreement((ECPrivateKey) this.clientKey.getPrivate(), (ECPublicKey) this.serverPublicKey);
 
-        HttpUriRequest request = RequestBuilder.post(this.serviceUrl + "/decrypt")
-                .setHeader("Client-Secret", this.clientSecret)
-                .setHeader("Public-Key", clientPublicKey)
-                .setEntity(new ByteArrayEntity(this.crypto.encrypt(secret, Base64.getEncoder().encodeToString(ciphertext)).getBytes(StandardCharsets.UTF_8)))
-                .build();
-        try (CloseableHttpResponse response = client.execute(request)) {
-            if (response.getStatusLine().getStatusCode() == 200) {
-                return Base64.getDecoder().decode(this.crypto.decrypt(secret, EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8)));
+        var builder = HttpRequest.newBuilder(URI.create(this.serviceUrl + "/decrypt"));
+        builder.setHeader("Client-Secret", this.clientSecret);
+        builder.setHeader("Public-Key", clientPublicKey);
+        builder.POST(HttpRequest.BodyPublishers.ofByteArray(this.crypto.encrypt(secret, Base64.getEncoder().encodeToString(ciphertext)).getBytes(StandardCharsets.UTF_8)));
+        var request = builder.build();
+
+        try {
+            HttpResponse<String> response = this.client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+            if (response.statusCode() == 200) {
+                return Base64.getDecoder().decode(this.crypto.decrypt(secret, response.body()));
             } else {
                 throw new GeneralSecurityException("encryption error");
             }
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             throw new GeneralSecurityException(e);
         }
     }

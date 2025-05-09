@@ -7,22 +7,19 @@ plugins {
 group = 'com.senior.cyber.sftps'
 version = '1.0.0'
 
-sourceCompatibility = '11'
+java {
+    sourceCompatibility = "$java_version"
+    targetCompatibility = "$java_version"
+}
 
 repositories {
     mavenLocal()
     mavenCentral()
-    maven {
-        url "$nexus_url/maven-public/"
-        allowInsecureProtocol = true
-    }
 }
 
 dependencies {
+    implementation project(":sftps-x509")
     implementation project(":sftps-dao")
-
-    implementation "com.senior.cyber.frmk:common:1.0.0"
-    implementation "com.senior.cyber.frmk:jdbc-query:1.0.0"
 
     implementation "joda-time:joda-time:${joda_time}"
     implementation "commons-validator:commons-validator:${commons_validator}"
@@ -31,36 +28,31 @@ dependencies {
     implementation "org.bouncycastle:bcpkix-jdk15to18:${bouncycastle}"
     implementation "org.bouncycastle:bcpg-jdk15to18:${bouncycastle}"
 
-    implementation "org.apache.wicket:wicket-auth-roles:${wicket}"
-
     implementation "com.google.code.gson:gson:${gson}"
     implementation "commons-io:commons-io:${commons_io}"
     implementation "org.apache.commons:commons-lang3:${commons_lang3}"
-    implementation "org.apache.wicket:wicket-core:${wicket}"
-    implementation "org.apache.wicket:wicket-extensions:${wicket}"
-    implementation "org.springframework.boot:spring-boot-starter-web"
-    implementation "org.springframework.boot:spring-boot-starter-data-jpa"
+    implementation "org.springframework.boot:spring-boot-starter-web:${spring_boot}"
+    implementation "org.springframework.boot:spring-boot-starter-data-jpa:${spring_boot}"
 
-    implementation "org.apache.httpcomponents:httpclient:${httpclient}"
     implementation "org.apache.commons:commons-compress:${commons_compress}"
 
     implementation "org.jasypt:jasypt:${jasypt}"
     implementation "org.apache.ftpserver:ftpserver-core:${ftpserver}"
 
-    implementation "mysql:mysql-connector-java"
-    implementation "org.flywaydb:flyway-core"
-    implementation "org.liquibase:liquibase-core"
+    implementation "com.mysql:mysql-connector-j:${mysql}"
+    implementation "org.flywaydb:flyway-core:${flyway}"
+    implementation "org.flywaydb:flyway-mysql:${flyway}"
 
     implementation "org.apache.sshd:sshd-core:${sshd}"
     implementation "org.apache.sshd:sshd-sftp:${sshd}"
     implementation "org.apache.sshd:sshd-scp:${sshd}"
 
-    implementation "org.reflections:reflections:${reflections}"
-    implementation "commons-beanutils:commons-beanutils:${commons_beanutils}"
     implementation "com.google.guava:guava:${guava}"
     implementation "com.jcraft:jsch:${jsch}"
     implementation "com.google.crypto.tink:tink:${google_tink}"
 
+    compileOnly "org.projectlombok:lombok:${lombok}"
+    annotationProcessor "org.projectlombok:lombok:${lombok}"
 }
 
 bootJar {

@@ -1,8 +1,5 @@
 package com.senior.cyber.sftps.web.pages.user;
 
-import com.senior.cyber.sftps.dao.entity.Role;
-import com.senior.cyber.sftps.dao.entity.User;
-import com.senior.cyber.sftps.dao.entity.User_;
 import com.senior.cyber.sftps.web.data.MySqlDataProvider;
 import com.senior.cyber.sftps.web.data.SingleChoiceProvider;
 import com.senior.cyber.sftps.web.repository.RoleRepository;

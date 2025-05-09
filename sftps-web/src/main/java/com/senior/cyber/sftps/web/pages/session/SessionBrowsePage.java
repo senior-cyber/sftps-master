@@ -1,7 +1,6 @@
 package com.senior.cyber.sftps.web.pages.session;
 
 import com.senior.cyber.frmk.jdbc.query.DeleteQuery;
-import com.senior.cyber.sftps.dao.entity.Role;
 import com.senior.cyber.sftps.web.MasterPage;
 import com.senior.cyber.sftps.web.data.MySqlDataProvider;
 import com.senior.cyber.frmk.common.base.Bookmark;

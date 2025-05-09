@@ -1,8 +1,6 @@
 package com.senior.cyber.sftps.web.pages.my.key;
 
-import com.senior.cyber.sftps.dao.entity.Key;
-import com.senior.cyber.sftps.dao.entity.Role;
-import com.senior.cyber.sftps.dao.entity.User;
+import com.senior.cyber.sftps.dao.entity.sftps.Key;
 import com.senior.cyber.sftps.web.MasterPage;
 import com.senior.cyber.sftps.web.configuration.PkiApiConfiguration;
 import com.senior.cyber.sftps.web.data.MySqlDataProvider;

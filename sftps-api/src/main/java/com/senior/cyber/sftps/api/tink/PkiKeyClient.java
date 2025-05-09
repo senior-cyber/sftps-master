@@ -2,16 +2,13 @@ package com.senior.cyber.sftps.api.tink;
 
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KmsClient;
-import com.senior.cyber.frmk.common.pki.PublicKeyUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.methods.RequestBuilder;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.util.EntityUtils;
+import com.senior.cyber.sftps.x509.PublicKeyUtils;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
@@ -24,7 +21,7 @@ public class PkiKeyClient implements KmsClient, Closeable {
 
     private final String clientSecret;
 
-    private final CloseableHttpClient client = HttpClientBuilder.create().build();
+    private final HttpClient client = HttpClient.newHttpClient();
 
     private final Crypto crypto;
 
@@ -53,10 +50,14 @@ public class PkiKeyClient implements KmsClient, Closeable {
     public Aead getAead(String keyUri) throws GeneralSecurityException {
 
         PublicKey serverPublicKey = null;
-        HttpUriRequest request = RequestBuilder.get(this.base + "/info").build();
-        try (CloseableHttpResponse response = this.client.execute(request)) {
-            serverPublicKey = PublicKeyUtils.read(EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8));
-        } catch (IOException e) {
+        var request = HttpRequest.newBuilder()
+                .GET()
+                .uri(java.net.URI.create(this.base + "/info"))
+                .build();
+        try {
+            HttpResponse<String> response = this.client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+            serverPublicKey = PublicKeyUtils.read(response.body());
+        } catch (IOException | InterruptedException e) {
             throw new GeneralSecurityException("server public key is required");
         }
 

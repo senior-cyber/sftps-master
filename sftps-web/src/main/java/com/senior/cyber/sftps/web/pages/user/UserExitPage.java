@@ -1,6 +1,5 @@
 package com.senior.cyber.sftps.web.pages.user;
 
-import com.senior.cyber.sftps.dao.entity.Role;
 import com.senior.cyber.sftps.web.factory.WebSession;
 import com.senior.cyber.frmk.common.base.Bookmark;
 import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;

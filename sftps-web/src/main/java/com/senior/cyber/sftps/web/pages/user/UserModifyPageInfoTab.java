@@ -1,6 +1,5 @@
 package com.senior.cyber.sftps.web.pages.user;
 
-import com.senior.cyber.sftps.dao.entity.User;
 import com.senior.cyber.sftps.web.repository.UserRepository;
 import com.senior.cyber.frmk.common.base.WicketFactory;
 import com.senior.cyber.frmk.common.wicket.extensions.markup.html.tabs.ContentPanel;

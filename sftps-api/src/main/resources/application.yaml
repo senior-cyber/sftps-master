@@ -1,0 +1,96 @@
+server:
+  ssl:
+    enabled: true
+    certificate: classpath:fullchain.pem
+    certificate-private-key: classpath:privkey.pem
+    trust-certificate: classpath:ca.pem
+    client-auth: WANT
+
+app:
+  ftp-port: 6021
+  ftp-data-port: 6100-6999
+  ftps-port: 7990
+  ftps-data-port: 7000-7500
+  sftp-port: 7022
+  workspace: /tmp
+  client-auth: optional
+  trust-store: classpath:ca.jks
+  trust-store-type: JKS
+  trust-store-password: changeit
+  key-store: classpath:sftps.p12
+  key-store-type: PKCS12
+  key-store-password: changeit
+  key-alias: sftps
+  key-password: changeit
+
+master:
+  aead:
+    client-id: 99764ed4-c6b1-4e84-ad5a-cff4962ff170
+    client-secret: c20fe5e7-b356-41ed-ab0f-35157e3206b4
+    uri: pki-kms://fbaaaddb-b414-4868-9def-cf90e091a8be
+    address: https://www.google.com
+
+spring:
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 100MB
+      strict-servlet-compliance: true
+  application:
+    name: sftps-master
+  threads:
+    virtual:
+      enabled: true
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    url: jdbc:mysql://192.168.1.53:33063/mysql_sftps
+    username: root
+    password: 123123a
+  jackson:
+    serialization:
+      indent_output: true
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: none
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    database: mysql
+    database-platform: org.hibernate.dialect.MySQLDialect
+    open-in-view: false
+    properties:
+      hibernate:
+        generate_statistics: true
+        format_sql: true
+  mvc:
+    servlet:
+      path: /
+      load-on-startup: 1
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db-migration
+    clean-disabled: false
+    validate-on-migrate: true
+  session:
+    jdbc:
+      save-mode: always
+      flush-mode: immediate
+      cleanup-cron: 0 * * * * *
+      initialize-schema: never
+      table-name: tbl_cluster_SPRING_SESSION
+      platform: mysql
+      schema: classpath:org/springframework/session/jdbc/schema-@@platform@@.sql
+  web:
+    resources:
+      cache:
+        period: 365 # Cache period in days
+      static-locations: classpath:/META-INF/web-resources/, classpath:/META-INF/resources/, classpath:/resources/, classpath:/static/, classpath:/public/
+
+logging:
+  charset:
+    console: UTF-8
+  level:
+    root: INFO
+    org.springframework.security: DEBUG

@@ -27,7 +27,7 @@ public class SftpSUser extends BaseUser {
         this.userId = userId;
         this.keyId = keyId;
         this.keyName = keyName;
-        if (secret != null && !"".equals(secret)) {
+        if (secret != null && !secret.isEmpty()) {
             this.originDictionary = SecretUtils.buildOriginToFake(secret);
             this.fakeDictionary = SecretUtils.buildFakeToOrigin(secret);
         } else {

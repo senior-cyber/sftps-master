@@ -1,13 +1,13 @@
 package com.senior.cyber.sftps.api.scp;
 
 import com.senior.cyber.sftps.api.dto.SftpSUser;
-import com.senior.cyber.sftps.api.repository.LogRepository;
-import com.senior.cyber.sftps.api.repository.UserRepository;
 import com.senior.cyber.sftps.api.tink.MasterAead;
 import com.senior.cyber.sftps.api.tink.WebHook;
-import com.senior.cyber.sftps.dao.entity.Log;
+import com.senior.cyber.sftps.dao.enums.EventTypeEnum;
+import com.senior.cyber.sftps.dao.entity.sftps.Log;
+import com.senior.cyber.sftps.dao.repository.rbac.UserRepository;
+import com.senior.cyber.sftps.dao.repository.sftps.LogRepository;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.sshd.server.session.ServerSession;
 import org.apache.sshd.sftp.server.AbstractSftpEventListenerAdapter;
 import org.apache.sshd.sftp.server.FileHandle;
@@ -15,6 +15,7 @@ import org.apache.sshd.sftp.server.Handle;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.http.HttpClient;
 import java.nio.file.CopyOption;
 import java.nio.file.Path;
 import java.util.*;
@@ -35,7 +36,7 @@ public class SftpSEventListenerAdapter extends AbstractSftpEventListenerAdapter 
 
     private Map<String, Long> sizes = new ConcurrentHashMap<>();
 
-    private final CloseableHttpClient client;
+    private final HttpClient client;
 
     private final LogRepository logRepository;
 
@@ -43,7 +44,7 @@ public class SftpSEventListenerAdapter extends AbstractSftpEventListenerAdapter 
 
     private final MasterAead masterAead;
 
-    public SftpSEventListenerAdapter(LogRepository logRepository, CloseableHttpClient client, UserRepository userRepository, MasterAead masterAead) {
+    public SftpSEventListenerAdapter(LogRepository logRepository, HttpClient client, UserRepository userRepository, MasterAead masterAead) {
         this.logRepository = logRepository;
         this.client = client;
         this.userRepository = userRepository;
@@ -78,7 +79,7 @@ public class SftpSEventListenerAdapter extends AbstractSftpEventListenerAdapter 
 
         Log log = new Log();
         log.setCreatedAt(new Date());
-        log.setEventType(Log.EVENT_TYPE_DELETED);
+        log.setEventType(EventTypeEnum.Deleted);
         log.setUserDisplayName(user.getUserDisplayName());
         log.setKeyName(user.getKeyName());
         log.setSrcPath(path);
@@ -102,7 +103,7 @@ public class SftpSEventListenerAdapter extends AbstractSftpEventListenerAdapter 
         } else {
             Log log = new Log();
             log.setCreatedAt(new Date());
-            log.setEventType(Log.EVENT_TYPE_MOVED);
+            log.setEventType(EventTypeEnum.Moved);
             log.setUserDisplayName(user.getUserDisplayName());
             log.setKeyName(user.getKeyName());
             log.setSize(dstFile.length());
@@ -130,7 +131,7 @@ public class SftpSEventListenerAdapter extends AbstractSftpEventListenerAdapter 
                         String path = name.substring(user.getHomeDirectory().length());
                         Log log = new Log();
                         log.setCreatedAt(new Date());
-                        log.setEventType(Log.EVENT_TYPE_UPLOADED);
+                        log.setEventType(EventTypeEnum.Uploaded);
                         log.setUserDisplayName(user.getUserDisplayName());
                         log.setKeyName(user.getKeyName());
                         log.setSize(file.length());
@@ -143,7 +144,7 @@ public class SftpSEventListenerAdapter extends AbstractSftpEventListenerAdapter 
                         if (newFile.exists()) {
                             Log log = new Log();
                             log.setCreatedAt(new Date());
-                            log.setEventType(Log.EVENT_TYPE_UPLOADED);
+                            log.setEventType(EventTypeEnum.Uploaded);
                             log.setUserDisplayName(user.getUserDisplayName());
                             log.setKeyName(user.getKeyName());
                             log.setSize(file.length());
@@ -158,7 +159,7 @@ public class SftpSEventListenerAdapter extends AbstractSftpEventListenerAdapter 
                     String path = file.getAbsolutePath().substring(user.getHomeDirectory().length());
                     Log log = new Log();
                     log.setCreatedAt(new Date());
-                    log.setEventType(Log.EVENT_TYPE_UPLOADED);
+                    log.setEventType(EventTypeEnum.Uploaded);
                     log.setUserDisplayName(user.getUserDisplayName());
                     log.setKeyName(user.getKeyName());
                     log.setSize(file.length());
@@ -175,7 +176,7 @@ public class SftpSEventListenerAdapter extends AbstractSftpEventListenerAdapter 
 
             Log log = new Log();
             log.setCreatedAt(new Date());
-            log.setEventType(Log.EVENT_TYPE_DOWNLOADED);
+            log.setEventType(EventTypeEnum.Downloaded);
             log.setUserDisplayName(user.getUserDisplayName());
             log.setKeyName(user.getKeyName());
             log.setSize(file.length());

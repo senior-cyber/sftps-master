@@ -1,6 +1,5 @@
 package com.senior.cyber.sftps.web.pages.user;
 
-import com.senior.cyber.sftps.dao.entity.Role;
 import com.senior.cyber.sftps.web.MasterPage;
 import com.senior.cyber.sftps.web.data.SingleChoiceProvider;
 import com.senior.cyber.frmk.common.base.Bookmark;

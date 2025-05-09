@@ -2,21 +2,21 @@ package com.senior.cyber.sftps.api.ftp;
 
 import com.senior.cyber.sftps.api.Audit;
 import com.senior.cyber.sftps.api.dto.SftpSUser;
-import com.senior.cyber.sftps.api.repository.KeyRepository;
-import com.senior.cyber.sftps.api.repository.LogRepository;
-import com.senior.cyber.sftps.api.repository.UserRepository;
 import com.senior.cyber.sftps.api.tink.MasterAead;
 import com.senior.cyber.sftps.api.tink.WebHook;
-import com.senior.cyber.sftps.dao.entity.Key;
-import com.senior.cyber.sftps.dao.entity.Log;
-import com.senior.cyber.sftps.dao.entity.User;
+import com.senior.cyber.sftps.dao.entity.sftps.Key;
+import com.senior.cyber.sftps.dao.entity.sftps.Log;
+import com.senior.cyber.sftps.dao.enums.EventTypeEnum;
+import com.senior.cyber.sftps.dao.repository.rbac.UserRepository;
+import com.senior.cyber.sftps.dao.repository.sftps.KeyRepository;
+import com.senior.cyber.sftps.dao.repository.sftps.LogRepository;
 import org.apache.ftpserver.ftplet.*;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.http.HttpClient;
 import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
@@ -26,7 +26,7 @@ public class SftpSFtplet extends DefaultFtplet {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SftpSFtplet.class);
 
-    private final CloseableHttpClient client;
+    private final HttpClient client;
 
     private final UserRepository userRepository;
 
@@ -40,7 +40,7 @@ public class SftpSFtplet extends DefaultFtplet {
 
     private Map<String, Long> sizes = new ConcurrentHashMap<>();
 
-    public SftpSFtplet(CloseableHttpClient client, UserRepository userRepository, KeyRepository keyRepository, LogRepository logRepository, MasterAead masterAead) {
+    public SftpSFtplet(HttpClient client, UserRepository userRepository, KeyRepository keyRepository, LogRepository logRepository, MasterAead masterAead) {
         this.renameSession = new ConcurrentHashMap<>();
         this.client = client;
         this.userRepository = userRepository;
@@ -68,12 +68,12 @@ public class SftpSFtplet extends DefaultFtplet {
         String userId = user.getUserId();
         String keyId = user.getKeyId();
 
-        Optional<com.senior.cyber.sftps.dao.entity.User> optionalUser = this.userRepository.findById(Long.parseLong(userId));
-        User userObject = optionalUser.orElseThrow(() -> new FtpException(""));
+        Optional<com.senior.cyber.sftps.dao.entity.rbac.User> optionalUser = this.userRepository.findById(userId);
+        com.senior.cyber.sftps.dao.entity.rbac.User userObject = optionalUser.orElseThrow(() -> new FtpException(""));
 
         Key keyObject = null;
         if (keyId != null) {
-            Optional<Key> optionalKey = this.keyRepository.findById(Long.parseLong(keyId));
+            Optional<Key> optionalKey = this.keyRepository.findById(keyId);
             keyObject = optionalKey.orElseThrow(() -> new FtpException(""));
         }
 
@@ -89,7 +89,7 @@ public class SftpSFtplet extends DefaultFtplet {
 
         Log log = new Log();
         log.setCreatedAt(new Date());
-        log.setEventType(Log.EVENT_TYPE_DOWNLOADED);
+        log.setEventType(EventTypeEnum.Downloaded);
         log.setUserDisplayName(userObject.getDisplayName());
         log.setKeyName(key);
         log.setSize(file.length());
@@ -120,7 +120,7 @@ public class SftpSFtplet extends DefaultFtplet {
 
         Log log = new Log();
         log.setCreatedAt(new Date());
-        log.setEventType(Log.EVENT_TYPE_DELETED);
+        log.setEventType(EventTypeEnum.Deleted);
         log.setUserDisplayName(user.getUserDisplayName());
         log.setKeyName(user.getKeyName());
         log.setSrcPath(path);
@@ -141,7 +141,7 @@ public class SftpSFtplet extends DefaultFtplet {
 
         Log log = new Log();
         log.setCreatedAt(new Date());
-        log.setEventType(Log.EVENT_TYPE_UPLOADED);
+        log.setEventType(EventTypeEnum.Uploaded);
         log.setUserDisplayName(user.getUserDisplayName());
         log.setKeyName(user.getKeyName());
         log.setSize(file.length());
@@ -173,7 +173,7 @@ public class SftpSFtplet extends DefaultFtplet {
 
         Log log = new Log();
         log.setCreatedAt(new Date());
-        log.setEventType(Log.EVENT_TYPE_MOVED);
+        log.setEventType(EventTypeEnum.Moved);
         log.setUserDisplayName(user.getUserDisplayName());
         log.setKeyName(user.getKeyName());
         log.setSize(dstFile.length());

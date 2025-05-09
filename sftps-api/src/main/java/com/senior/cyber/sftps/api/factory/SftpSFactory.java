@@ -2,17 +2,17 @@ package com.senior.cyber.sftps.api.factory;
 
 import com.senior.cyber.sftps.api.BootApplication;
 import com.senior.cyber.sftps.api.UserManager;
-import com.senior.cyber.sftps.api.configuration.ApplicationConfiguration;
+import com.senior.cyber.sftps.api.configuration.AppConfig;
 import com.senior.cyber.sftps.api.ftp.SftpSFtplet;
 import com.senior.cyber.sftps.api.ftp.SftpSNativeFileSystemFactory;
-import com.senior.cyber.sftps.api.repository.KeyRepository;
-import com.senior.cyber.sftps.api.repository.LogRepository;
-import com.senior.cyber.sftps.api.repository.UserRepository;
 import com.senior.cyber.sftps.api.scp.ScpFileOpener;
 import com.senior.cyber.sftps.api.scp.SftpSEventListenerAdapter;
 import com.senior.cyber.sftps.api.scp.SftpSSubsystemFactory;
 import com.senior.cyber.sftps.api.scp.SftpSVirtualFileSystemFactory;
 import com.senior.cyber.sftps.api.tink.MasterAead;
+import com.senior.cyber.sftps.dao.repository.rbac.UserRepository;
+import com.senior.cyber.sftps.dao.repository.sftps.KeyRepository;
+import com.senior.cyber.sftps.dao.repository.sftps.LogRepository;
 import org.apache.commons.io.FileUtils;
 import org.apache.ftpserver.DataConnectionConfigurationFactory;
 import org.apache.ftpserver.FtpServer;
@@ -22,7 +22,6 @@ import org.apache.ftpserver.listener.ListenerFactory;
 import org.apache.ftpserver.ssl.ClientAuth;
 import org.apache.ftpserver.ssl.SslConfiguration;
 import org.apache.ftpserver.ssl.SslConfigurationFactory;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.sshd.common.config.keys.KeyUtils;
 import org.apache.sshd.scp.server.ScpCommandFactory;
 import org.apache.sshd.server.SshServer;
@@ -35,6 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AbstractFactoryBean;
 
 import java.io.File;
+import java.net.http.HttpClient;
 import java.nio.file.FileSystems;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -51,7 +51,7 @@ public class SftpSFactory extends AbstractFactoryBean<SftpS> {
     private SshServer sshd = null;
 
     @Autowired
-    protected ApplicationConfiguration configuration;
+    protected AppConfig appConfig;
 
     @Autowired
     protected UserRepository userRepository;
@@ -69,7 +69,7 @@ public class SftpSFactory extends AbstractFactoryBean<SftpS> {
     protected MasterAead masterAead;
 
     @Autowired
-    protected CloseableHttpClient client;
+    protected HttpClient client;
 
     @Override
     public Class<?> getObjectType() {
@@ -79,24 +79,24 @@ public class SftpSFactory extends AbstractFactoryBean<SftpS> {
     @Override
     protected SftpS createInstance() throws Exception {
 
-        int ftpsPort = this.configuration.getFtpsPort();
+        int ftpsPort = this.appConfig.getFtpsPort();
 
         SslConfiguration sslConfiguration = null;
         if (ftpsPort != -1 && ftpsPort != 0) {
             SslConfigurationFactory factory = new SslConfigurationFactory();
-            File trustStore = this.configuration.getTrustStore();
-            factory.setTruststoreType(this.configuration.getTrustStoreType());
+            File trustStore = this.appConfig.getTrustStore();
+            factory.setTruststoreType(this.appConfig.getTrustStoreType());
             if (trustStore != null) {
                 factory.setTruststoreFile(trustStore);
             }
-            String truststorePassword = this.configuration.getTrustStorePassword();
+            String truststorePassword = this.appConfig.getTrustStorePassword();
             if (truststorePassword != null) {
                 factory.setTruststorePassword(truststorePassword);
             } else {
                 factory.setTruststorePassword("");
             }
 
-            String clientAuthentication = this.configuration.getClientAuth();
+            String clientAuthentication = this.appConfig.getClientAuth();
             if ("optional".equalsIgnoreCase(clientAuthentication)) {
                 factory.setClientAuthentication(ClientAuth.WANT.name());
             } else if ("yes".equalsIgnoreCase(clientAuthentication) || "true".equalsIgnoreCase(clientAuthentication)) {
@@ -105,25 +105,25 @@ public class SftpSFactory extends AbstractFactoryBean<SftpS> {
                 factory.setClientAuthentication(ClientAuth.NONE.name());
             }
 
-            String keyAlias = this.configuration.getKeyAlias();
+            String keyAlias = this.appConfig.getKeyAlias();
             if (keyAlias != null && !"".equals(keyAlias)) {
                 factory.setKeyAlias(keyAlias);
             }
 
-            String keyPassword = this.configuration.getKeyPassword();
+            String keyPassword = this.appConfig.getKeyPassword();
             if (keyPassword != null) {
                 factory.setKeyPassword(keyPassword);
             } else {
                 factory.setKeyPassword("");
             }
 
-            File keyStore = this.configuration.getKeyStore();
-            factory.setKeystoreType(this.configuration.getKeyStoreType());
+            File keyStore = this.appConfig.getKeyStore();
+            factory.setKeystoreType(this.appConfig.getKeyStoreType());
             if (keyStore != null) {
                 factory.setKeystoreFile(keyStore);
             }
 
-            String keyStorePassword = this.configuration.getKeyStorePassword();
+            String keyStorePassword = this.appConfig.getKeyStorePassword();
             if (keyStorePassword != null) {
                 factory.setKeystorePassword(keyStorePassword);
             } else {
@@ -138,7 +138,7 @@ public class SftpSFactory extends AbstractFactoryBean<SftpS> {
         }
 
         SftpSFtplet sftpSFtplet = new SftpSFtplet(this.client, this.userRepository, this.keyRepository, this.logRepository, masterAead);
-        UserManager userManager = new UserManager(this.passwordEncryptor, this.userRepository, this.keyRepository, this.configuration, this.masterAead);
+        UserManager userManager = new UserManager(this.passwordEncryptor, this.userRepository, this.keyRepository, this.appConfig, this.masterAead);
 
         List<String> logs = new ArrayList<>();
 
@@ -152,14 +152,14 @@ public class SftpSFactory extends AbstractFactoryBean<SftpS> {
                 ssl = true;
             }
             if (ssl) {
-                String ftpsDataPort = this.configuration.getFtpsDataPort();
+                String ftpsDataPort = this.appConfig.getFtpsDataPort();
                 DataConnectionConfigurationFactory factory = new DataConnectionConfigurationFactory();
                 factory.setPassivePorts(ftpsDataPort);
-                if (this.configuration.getPassiveAddress() != null && !"".equals(this.configuration.getPassiveAddress())) {
-                    factory.setPassiveAddress(this.configuration.getPassiveAddress());
+                if (this.appConfig.getPassiveAddress() != null && !"".equals(this.appConfig.getPassiveAddress())) {
+                    factory.setPassiveAddress(this.appConfig.getPassiveAddress());
                 }
-                if (this.configuration.getPassiveExternalAddress() != null && !"".equals(this.configuration.getPassiveExternalAddress())) {
-                    factory.setPassiveExternalAddress(this.configuration.getPassiveExternalAddress());
+                if (this.appConfig.getPassiveExternalAddress() != null && !"".equals(this.appConfig.getPassiveExternalAddress())) {
+                    factory.setPassiveExternalAddress(this.appConfig.getPassiveExternalAddress());
                 }
                 factory.setPassiveIpCheck(true);
                 factory.setSslConfiguration(sslConfiguration);
@@ -177,15 +177,15 @@ public class SftpSFactory extends AbstractFactoryBean<SftpS> {
             }
         }
 
-        int ftpPort = this.configuration.getFtpPort();
+        int ftpPort = this.appConfig.getFtpPort();
         if (ftpPort != -1 && ftpPort != 0) {
-            String ftpDataPort = this.configuration.getFtpDataPort();
+            String ftpDataPort = this.appConfig.getFtpDataPort();
             DataConnectionConfigurationFactory factory = new DataConnectionConfigurationFactory();
-            if (this.configuration.getPassiveAddress() != null && !"".equals(this.configuration.getPassiveAddress())) {
-                factory.setPassiveAddress(this.configuration.getPassiveAddress());
+            if (this.appConfig.getPassiveAddress() != null && !"".equals(this.appConfig.getPassiveAddress())) {
+                factory.setPassiveAddress(this.appConfig.getPassiveAddress());
             }
-            if (this.configuration.getPassiveExternalAddress() != null && !"".equals(this.configuration.getPassiveExternalAddress())) {
-                factory.setPassiveExternalAddress(this.configuration.getPassiveExternalAddress());
+            if (this.appConfig.getPassiveExternalAddress() != null && !"".equals(this.appConfig.getPassiveExternalAddress())) {
+                factory.setPassiveExternalAddress(this.appConfig.getPassiveExternalAddress());
             }
             factory.setPassivePorts(ftpDataPort);
             ListenerFactory listenerFactory = new ListenerFactory();
@@ -204,10 +204,10 @@ public class SftpSFactory extends AbstractFactoryBean<SftpS> {
             logs.add("      data ftp port [" + ftpDataPort + "]");
         }
 
-        int sftpPort = this.configuration.getSftpPort();
+        int sftpPort = this.appConfig.getSftpPort();
         if (sftpPort != -1 && sftpPort != 0) {
             sshd = SshServer.setUpDefaultServer();
-            sshd.setFileSystemFactory(new SftpSVirtualFileSystemFactory(this.configuration, this.userRepository));
+            sshd.setFileSystemFactory(new SftpSVirtualFileSystemFactory(this.appConfig, this.userRepository));
 
             File key = new File(FileUtils.getTempDirectory(), BootApplication.class.getSimpleName() + ".key");
             SimpleGeneratorHostKeyProvider provider = new SimpleGeneratorHostKeyProvider(FileSystems.getDefault().getPath(key.getAbsolutePath()));
