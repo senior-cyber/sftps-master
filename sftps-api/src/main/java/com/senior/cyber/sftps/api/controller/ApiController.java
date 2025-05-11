@@ -1,13 +1,10 @@
 package com.senior.cyber.sftps.api.controller;
 
 
-import com.google.crypto.tink.Aead;
-import com.google.crypto.tink.JsonKeysetReader;
-import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.*;
 import com.senior.cyber.sftps.api.HttpExtension;
 import com.senior.cyber.sftps.api.SecretUtils;
 import com.senior.cyber.sftps.api.configuration.AppConfig;
-import com.senior.cyber.sftps.api.tink.MasterAead;
 import com.senior.cyber.sftps.api.tink.WebHook;
 import com.senior.cyber.sftps.dao.entity.rbac.User;
 import com.senior.cyber.sftps.dao.enums.EventTypeEnum;
@@ -64,9 +61,6 @@ public class ApiController {
 
     @Autowired
     protected LogRepository logRepository;
-
-    @Autowired
-    protected MasterAead masterAead;
 
     @Autowired
     protected HttpClient client;
@@ -144,7 +138,7 @@ public class ApiController {
         }
         log.setSrcPath(fn.substring(homeDirectory.length()));
         logRepository.save(log);
-        WebHook.report(this.client, this.userRepository, this.masterAead, log, userObject, key);
+        WebHook.report(this.client, this.userRepository, log, userObject, key);
     }
 
     @PutMapping(path = "/**")
@@ -199,13 +193,18 @@ public class ApiController {
         }
 
         String dek = userObject.getDek();
+        Aead dekAead = null;
+        if (dek != null && !dek.isEmpty()) {
+            KeysetHandle handle = TinkProtoKeysetFormat.parseKeyset(Base64.getDecoder().decode(dek), InsecureSecretKeyAccess.get());
+            dekAead = handle.getPrimitive(RegistryConfiguration.get(), Aead.class);
+        }
+
         String black_secret = userObject.getSecret();
 
         String white_secret = null;
         if (black_secret != null && !black_secret.isEmpty()) {
-            if (dek != null && !dek.isEmpty()) {
-                Aead aeadDek = KeysetHandle.read(JsonKeysetReader.withString(dek), masterAead).getPrimitive(Aead.class);
-                white_secret = new String(aeadDek.decrypt(Base64.getDecoder().decode(black_secret), "".getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
+            if (dekAead != null) {
+                white_secret = new String(dekAead.decrypt(Base64.getDecoder().decode(black_secret), "".getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
             } else {
                 white_secret = black_secret;
             }
@@ -242,7 +241,7 @@ public class ApiController {
         log.setSize(file.length());
         log.setSrcPath(fn.substring(homeDirectory.length()));
         logRepository.save(log);
-        WebHook.report(this.client, this.userRepository, this.masterAead, log, userObject, key);
+        WebHook.report(this.client, this.userRepository, log, userObject, key);
     }
 
     @GetMapping(path = "/**")
@@ -369,13 +368,19 @@ public class ApiController {
             writer.write("</html>\n");
         } else if (file.isFile()) {
             String dek = userObject.getDek();
+
+            Aead dekAead = null;
+            if (dek != null && !dek.isEmpty()) {
+                KeysetHandle handle = TinkProtoKeysetFormat.parseKeyset(Base64.getDecoder().decode(dek), InsecureSecretKeyAccess.get());
+                dekAead = handle.getPrimitive(RegistryConfiguration.get(), Aead.class);
+            }
+
             String black_secret = userObject.getSecret();
 
             String white_secret = null;
             if (black_secret != null && !black_secret.isEmpty()) {
-                if (dek != null && !dek.isEmpty()) {
-                    Aead aeadDek = KeysetHandle.read(JsonKeysetReader.withString(dek), masterAead).getPrimitive(Aead.class);
-                    white_secret = new String(aeadDek.decrypt(Base64.getDecoder().decode(black_secret), "".getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
+                if (dekAead != null) {
+                    white_secret = new String(dekAead.decrypt(Base64.getDecoder().decode(black_secret), "".getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
                 } else {
                     white_secret = black_secret;
                 }
@@ -412,7 +417,7 @@ public class ApiController {
             log.setSize(file.length());
             log.setSrcPath(fn.substring(homeDirectory.length()));
             logRepository.save(log);
-            WebHook.report(this.client, this.userRepository, this.masterAead, log, userObject, key);
+            WebHook.report(this.client, this.userRepository, log, userObject, key);
         }
     }
 

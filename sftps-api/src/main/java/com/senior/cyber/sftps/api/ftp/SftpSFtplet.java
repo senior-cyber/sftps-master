@@ -2,7 +2,6 @@ package com.senior.cyber.sftps.api.ftp;
 
 import com.senior.cyber.sftps.api.Audit;
 import com.senior.cyber.sftps.api.dto.SftpSUser;
-import com.senior.cyber.sftps.api.tink.MasterAead;
 import com.senior.cyber.sftps.api.tink.WebHook;
 import com.senior.cyber.sftps.dao.entity.sftps.Key;
 import com.senior.cyber.sftps.dao.entity.sftps.Log;
@@ -34,19 +33,16 @@ public class SftpSFtplet extends DefaultFtplet {
 
     private final LogRepository logRepository;
 
-    private final MasterAead masterAead;
-
     private ConcurrentHashMap<String, File> renameSession;
 
     private Map<String, Long> sizes = new ConcurrentHashMap<>();
 
-    public SftpSFtplet(HttpClient client, UserRepository userRepository, KeyRepository keyRepository, LogRepository logRepository, MasterAead masterAead) {
+    public SftpSFtplet(HttpClient client, UserRepository userRepository, KeyRepository keyRepository, LogRepository logRepository) {
         this.renameSession = new ConcurrentHashMap<>();
         this.client = client;
         this.userRepository = userRepository;
         this.keyRepository = keyRepository;
         this.logRepository = logRepository;
-        this.masterAead = masterAead;
     }
 
     @Override
@@ -95,7 +91,7 @@ public class SftpSFtplet extends DefaultFtplet {
         log.setSize(file.length());
         log.setSrcPath(path);
         logRepository.save(log);
-        WebHook.report(this.client, this.userRepository, this.masterAead, log, user);
+        WebHook.report(this.client, this.userRepository, log, user);
         return FtpletResult.DEFAULT;
     }
 
@@ -126,7 +122,7 @@ public class SftpSFtplet extends DefaultFtplet {
         log.setSrcPath(path);
         log.setSize(size);
         logRepository.save(log);
-        WebHook.report(this.client, this.userRepository, this.masterAead, log, user);
+        WebHook.report(this.client, this.userRepository, log, user);
         return FtpletResult.DEFAULT;
     }
 
@@ -147,7 +143,7 @@ public class SftpSFtplet extends DefaultFtplet {
         log.setSize(file.length());
         log.setSrcPath(path);
         logRepository.save(log);
-        WebHook.report(this.client, this.userRepository, this.masterAead, log, user);
+        WebHook.report(this.client, this.userRepository, log, user);
         return FtpletResult.DEFAULT;
     }
 
@@ -180,7 +176,7 @@ public class SftpSFtplet extends DefaultFtplet {
         log.setSrcPath(srcPath);
         log.setDstPath(dstPath);
         logRepository.save(log);
-        WebHook.report(this.client, this.userRepository, this.masterAead, log, user);
+        WebHook.report(this.client, this.userRepository, log, user);
         return FtpletResult.DEFAULT;
     }
 }

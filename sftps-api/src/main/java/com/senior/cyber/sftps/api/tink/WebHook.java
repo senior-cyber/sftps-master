@@ -1,8 +1,6 @@
 package com.senior.cyber.sftps.api.tink;
 
-import com.google.crypto.tink.Aead;
-import com.google.crypto.tink.JsonKeysetReader;
-import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.senior.cyber.sftps.api.dto.SftpSUser;
@@ -41,7 +39,7 @@ public class WebHook {
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-    public static void report(HttpClient client, UserRepository userRepository, MasterAead masterAead, Log log, User user, String keyId, String keyName) {
+    public static void report(HttpClient client, UserRepository userRepository, Log log, User user, String keyId, String keyName) {
         if (user.isWebhookEnabled() && user.getWebhookUrl() != null && !"".equals(user.getWebhookUrl())) {
             Map<String, Object> gson = new HashMap<>();
             gson.put("when", DateFormatUtils.ISO_8601_EXTENDED_DATETIME_TIME_ZONE_FORMAT.format(log.getCreatedAt()));
@@ -63,8 +61,12 @@ public class WebHook {
 
             Aead aeadDek = null;
             try {
-                aeadDek = KeysetHandle.read(JsonKeysetReader.withString(user.getDek()), masterAead).getPrimitive(Aead.class);
-            } catch (IOException | GeneralSecurityException e) {
+                String dek = user.getDek();
+                if (dek != null && !dek.isEmpty()) {
+                    KeysetHandle handle = TinkProtoKeysetFormat.parseKeyset(Base64.getDecoder().decode(dek), InsecureSecretKeyAccess.get());
+                    aeadDek = handle.getPrimitive(RegistryConfiguration.get(), Aead.class);
+                }
+            } catch (GeneralSecurityException e) {
             }
 
             String secret_value = null;
@@ -119,18 +121,18 @@ public class WebHook {
         }
     }
 
-    public static void report(HttpClient client, UserRepository userRepository, MasterAead masterAead, Log log, User user, Key key) {
+    public static void report(HttpClient client, UserRepository userRepository, Log log, User user, Key key) {
         if (key == null) {
-            report(client, userRepository, masterAead, log, user, null, null);
+            report(client, userRepository, log, user, null, null);
         } else {
-            report(client, userRepository, masterAead, log, user, key.getId(), key.getName());
+            report(client, userRepository, log, user, key.getId(), key.getName());
         }
     }
 
-    public static void report(HttpClient client, UserRepository userRepository, MasterAead masterAead, Log log, SftpSUser sftpsUser) {
+    public static void report(HttpClient client, UserRepository userRepository, Log log, SftpSUser sftpsUser) {
         Optional<User> optionalUser = userRepository.findById(sftpsUser.getUserId());
         User user = optionalUser.orElseThrow();
-        report(client, userRepository, masterAead, log, user, sftpsUser.getKeyId() == null || "".equals(sftpsUser.getKeyId()) ? null : sftpsUser.getKeyId(), sftpsUser.getKeyName());
+        report(client, userRepository, log, user, sftpsUser.getKeyId() == null || "".equals(sftpsUser.getKeyId()) ? null : sftpsUser.getKeyId(), sftpsUser.getKeyName());
     }
 
 }

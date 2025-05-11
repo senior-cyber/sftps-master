@@ -9,7 +9,6 @@ import com.senior.cyber.sftps.api.scp.ScpFileOpener;
 import com.senior.cyber.sftps.api.scp.SftpSEventListenerAdapter;
 import com.senior.cyber.sftps.api.scp.SftpSSubsystemFactory;
 import com.senior.cyber.sftps.api.scp.SftpSVirtualFileSystemFactory;
-import com.senior.cyber.sftps.api.tink.MasterAead;
 import com.senior.cyber.sftps.dao.repository.rbac.UserRepository;
 import com.senior.cyber.sftps.dao.repository.sftps.KeyRepository;
 import com.senior.cyber.sftps.dao.repository.sftps.LogRepository;
@@ -64,9 +63,6 @@ public class SftpSFactory extends AbstractFactoryBean<SftpS> {
 
     @Autowired
     protected LogRepository logRepository;
-
-    @Autowired
-    protected MasterAead masterAead;
 
     @Autowired
     protected HttpClient client;
@@ -137,8 +133,8 @@ public class SftpSFactory extends AbstractFactoryBean<SftpS> {
             }
         }
 
-        SftpSFtplet sftpSFtplet = new SftpSFtplet(this.client, this.userRepository, this.keyRepository, this.logRepository, masterAead);
-        UserManager userManager = new UserManager(this.passwordEncryptor, this.userRepository, this.keyRepository, this.appConfig, this.masterAead);
+        SftpSFtplet sftpSFtplet = new SftpSFtplet(this.client, this.userRepository, this.keyRepository, this.logRepository);
+        UserManager userManager = new UserManager(this.passwordEncryptor, this.userRepository, this.keyRepository, this.appConfig);
 
         List<String> logs = new ArrayList<>();
 
@@ -181,10 +177,10 @@ public class SftpSFactory extends AbstractFactoryBean<SftpS> {
         if (ftpPort != -1 && ftpPort != 0) {
             String ftpDataPort = this.appConfig.getFtpDataPort();
             DataConnectionConfigurationFactory factory = new DataConnectionConfigurationFactory();
-            if (this.appConfig.getPassiveAddress() != null && !"".equals(this.appConfig.getPassiveAddress())) {
+            if (this.appConfig.getPassiveAddress() != null && !this.appConfig.getPassiveAddress().isEmpty()) {
                 factory.setPassiveAddress(this.appConfig.getPassiveAddress());
             }
-            if (this.appConfig.getPassiveExternalAddress() != null && !"".equals(this.appConfig.getPassiveExternalAddress())) {
+            if (this.appConfig.getPassiveExternalAddress() != null && !this.appConfig.getPassiveExternalAddress().isEmpty()) {
                 factory.setPassiveExternalAddress(this.appConfig.getPassiveExternalAddress());
             }
             factory.setPassivePorts(ftpDataPort);
@@ -220,7 +216,7 @@ public class SftpSFactory extends AbstractFactoryBean<SftpS> {
 
             SftpSSubsystemFactory sftp = new SftpSSubsystemFactory();
             sshd.setSubsystemFactories(Collections.singletonList(sftp));
-            sftp.addSftpEventListener(new SftpSEventListenerAdapter(this.logRepository, this.client, this.userRepository, masterAead));
+            sftp.addSftpEventListener(new SftpSEventListenerAdapter(this.logRepository, this.client, this.userRepository));
 
             /**
              * only for SCP, but it was not working

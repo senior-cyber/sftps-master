@@ -23,13 +23,6 @@ app:
   key-alias: sftps
   key-password: changeit
 
-master:
-  aead:
-    client-id: 99764ed4-c6b1-4e84-ad5a-cff4962ff170
-    client-secret: c20fe5e7-b356-41ed-ab0f-35157e3206b4
-    uri: pki-kms://fbaaaddb-b414-4868-9def-cf90e091a8be
-    address: https://www.google.com
-
 spring:
   servlet:
     multipart:

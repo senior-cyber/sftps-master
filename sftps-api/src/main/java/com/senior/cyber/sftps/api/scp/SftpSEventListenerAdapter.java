@@ -1,10 +1,9 @@
 package com.senior.cyber.sftps.api.scp;
 
 import com.senior.cyber.sftps.api.dto.SftpSUser;
-import com.senior.cyber.sftps.api.tink.MasterAead;
 import com.senior.cyber.sftps.api.tink.WebHook;
-import com.senior.cyber.sftps.dao.enums.EventTypeEnum;
 import com.senior.cyber.sftps.dao.entity.sftps.Log;
+import com.senior.cyber.sftps.dao.enums.EventTypeEnum;
 import com.senior.cyber.sftps.dao.repository.rbac.UserRepository;
 import com.senior.cyber.sftps.dao.repository.sftps.LogRepository;
 import org.apache.commons.io.FilenameUtils;
@@ -42,13 +41,10 @@ public class SftpSEventListenerAdapter extends AbstractSftpEventListenerAdapter 
 
     private final UserRepository userRepository;
 
-    private final MasterAead masterAead;
-
-    public SftpSEventListenerAdapter(LogRepository logRepository, HttpClient client, UserRepository userRepository, MasterAead masterAead) {
+    public SftpSEventListenerAdapter(LogRepository logRepository, HttpClient client, UserRepository userRepository) {
         this.logRepository = logRepository;
         this.client = client;
         this.userRepository = userRepository;
-        this.masterAead = masterAead;
     }
 
     @Override
@@ -85,7 +81,7 @@ public class SftpSEventListenerAdapter extends AbstractSftpEventListenerAdapter 
         log.setSrcPath(path);
         log.setSize(size);
         logRepository.save(log);
-        WebHook.report(this.client, this.userRepository, this.masterAead, log, user);
+        WebHook.report(this.client, this.userRepository, log, user);
     }
 
     @Override
@@ -110,7 +106,7 @@ public class SftpSEventListenerAdapter extends AbstractSftpEventListenerAdapter 
             log.setSrcPath(srcPathS);
             log.setDstPath(dstPathS);
             logRepository.save(log);
-            WebHook.report(this.client, this.userRepository, this.masterAead, log, user);
+            WebHook.report(this.client, this.userRepository, log, user);
         }
     }
 
@@ -137,7 +133,7 @@ public class SftpSEventListenerAdapter extends AbstractSftpEventListenerAdapter 
                         log.setSize(file.length());
                         log.setSrcPath(path);
                         logRepository.save(log);
-                        WebHook.report(this.client, this.userRepository, this.masterAead, log, user);
+                        WebHook.report(this.client, this.userRepository, log, user);
                     } else {
                         File newFile = new File(file.getParent(), FilenameUtils.getBaseName(file.getName()));
                         String path = file.getAbsolutePath().substring(user.getHomeDirectory().length());
@@ -150,7 +146,7 @@ public class SftpSEventListenerAdapter extends AbstractSftpEventListenerAdapter 
                             log.setSize(file.length());
                             log.setSrcPath(path);
                             logRepository.save(log);
-                            WebHook.report(this.client, this.userRepository, this.masterAead, log, user);
+                            WebHook.report(this.client, this.userRepository, log, user);
                         }
                     }
                 }, 100, TimeUnit.MICROSECONDS);
@@ -165,7 +161,7 @@ public class SftpSEventListenerAdapter extends AbstractSftpEventListenerAdapter 
                     log.setSize(file.length());
                     log.setSrcPath(path);
                     logRepository.save(log);
-                    WebHook.report(this.client, this.userRepository, this.masterAead, log, user);
+                    WebHook.report(this.client, this.userRepository, log, user);
                 }
             }
             return;
@@ -182,7 +178,7 @@ public class SftpSEventListenerAdapter extends AbstractSftpEventListenerAdapter 
             log.setSize(file.length());
             log.setSrcPath(path);
             logRepository.save(log);
-            WebHook.report(this.client, this.userRepository, this.masterAead, log, user);
+            WebHook.report(this.client, this.userRepository, log, user);
         }
     }
 
