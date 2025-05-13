@@ -68,13 +68,16 @@ public class UserManager implements org.apache.ftpserver.ftplet.UserManager, Pas
 
             String dek = userObject.getDek();
             Aead dekAead = null;
-            if (dek != null && !dek.isEmpty()) {
+            if (dek != null && !dek.isBlank()) {
                 KeysetHandle handle = TinkProtoKeysetFormat.parseKeyset(Base64.getDecoder().decode(dek), InsecureSecretKeyAccess.get());
                 dekAead = handle.getPrimitive(RegistryConfiguration.get(), Aead.class);
             }
 
             File homeDirectory = new File(configuration.getWorkspace(), userObject.getHomeDirectory());
-            homeDirectory.mkdirs();
+            boolean made = homeDirectory.mkdirs();
+            if (!made) {
+                LOGGER.info("make directory [{}]", homeDirectory.exists());
+            }
 
             return authenticated(String.valueOf(userObject.getId()), username, null, null, userObject.getDisplayName(), userObject.getSecret(), dekAead, homeDirectory, userObject.isEncryptAtRest());
         } catch (GeneralSecurityException | IOException e) {
@@ -100,17 +103,9 @@ public class UserManager implements org.apache.ftpserver.ftplet.UserManager, Pas
         return this.userRepository.existsByLogin(username);
     }
 
-    /**
-     * FTP Authentication
-     *
-     * @param authentication
-     * @return
-     * @throws AuthenticationFailedException
-     */
     @Override
     public org.apache.ftpserver.ftplet.User authenticate(Authentication authentication) throws AuthenticationFailedException {
-        if (authentication instanceof UsernamePasswordAuthentication) {
-            UsernamePasswordAuthentication upauth = (UsernamePasswordAuthentication) authentication;
+        if (authentication instanceof UsernamePasswordAuthentication upauth) {
 
             String login = upauth.getUsername();
             String password = upauth.getPassword();
@@ -125,9 +120,9 @@ public class UserManager implements org.apache.ftpserver.ftplet.UserManager, Pas
                 }
             }
 
-            if ((password == null || "".equals(password)) && (upauth.getUserMetadata().getCertificateChain() == null || upauth.getUserMetadata().getCertificateChain().length == 0)) {
+            if ((password == null || password.isBlank()) && (upauth.getUserMetadata().getCertificateChain() == null || upauth.getUserMetadata().getCertificateChain().length == 0)) {
                 throw new AuthenticationFailedException("Authentication failed");
-            } else if ((password != null && !"".equals(password)) && (upauth.getUserMetadata().getCertificateChain() != null && upauth.getUserMetadata().getCertificateChain().length >= 1)) {
+            } else if ((password != null && !password.isBlank()) && (upauth.getUserMetadata().getCertificateChain() != null && upauth.getUserMetadata().getCertificateChain().length >= 1)) {
                 throw new AuthenticationFailedException("Authentication failed");
             }
 
@@ -142,7 +137,7 @@ public class UserManager implements org.apache.ftpserver.ftplet.UserManager, Pas
 
             String userId = String.valueOf(userObject.getId());
 
-            if (password != null && !"".equals(password)) {
+            if (password != null && !password.isBlank()) {
                 if (this.passwordEncryptor.checkPassword(password, userObject.getPassword())) {
                     userObject.setLastSeen(LocalDate.now().toDate());
                     userRepository.save(userObject);
@@ -150,7 +145,7 @@ public class UserManager implements org.apache.ftpserver.ftplet.UserManager, Pas
                     try {
                         String dek = userObject.getDek();
                         Aead dekAead = null;
-                        if (dek != null && !dek.isEmpty()) {
+                        if (dek != null && !dek.isBlank()) {
                             KeysetHandle handle = TinkProtoKeysetFormat.parseKeyset(Base64.getDecoder().decode(dek), InsecureSecretKeyAccess.get());
                             dekAead = handle.getPrimitive(RegistryConfiguration.get(), Aead.class);
                         }
@@ -170,7 +165,7 @@ public class UserManager implements org.apache.ftpserver.ftplet.UserManager, Pas
                         for (Key key : keys) {
                             X509Certificate certificate = CertificateUtils.read(key.getCertificate());
                             PublicKey b = PublicKeyUtils.read(PublicKeyUtils.write(certificate.getPublicKey()));
-                            if (key.isEnabled() && a.equals(b)) {
+                            if (key.isEnabled() && a != null && a.equals(b)) {
                                 String keyId = String.valueOf(key.getId());
 
                                 userObject.setLastSeen(LocalDate.now().toDate());
@@ -181,7 +176,7 @@ public class UserManager implements org.apache.ftpserver.ftplet.UserManager, Pas
 
                                 String dek = userObject.getDek();
                                 Aead dekAead = null;
-                                if (dek != null && !dek.isEmpty()) {
+                                if (dek != null && !dek.isBlank()) {
                                     KeysetHandle handle = TinkProtoKeysetFormat.parseKeyset(Base64.getDecoder().decode(dek), InsecureSecretKeyAccess.get());
                                     dekAead = handle.getPrimitive(RegistryConfiguration.get(), Aead.class);
                                 }
@@ -205,7 +200,7 @@ public class UserManager implements org.apache.ftpserver.ftplet.UserManager, Pas
     private SftpSUser authenticated(String userId, String userName, String keyId, String keyName, String userDisplayName, String black_secret, Aead dek, File homeDirectory, boolean encryptAtRest) throws GeneralSecurityException, IOException {
         LOGGER.info("userName [{}] homeDirectory [{}]", userName, homeDirectory.getAbsolutePath());
         String white_secret = null;
-        if (black_secret != null && !black_secret.isEmpty()) {
+        if (black_secret != null && !black_secret.isBlank()) {
             if (dek != null) {
                 white_secret = new String(dek.decrypt(Base64.getDecoder().decode(black_secret), "".getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
             } else {
@@ -214,7 +209,10 @@ public class UserManager implements org.apache.ftpserver.ftplet.UserManager, Pas
         }
         SftpSUser user = new SftpSUser(userId, keyId, keyName, userDisplayName, white_secret, encryptAtRest);
         user.setName(userName);
-        homeDirectory.mkdirs();
+        boolean made = homeDirectory.mkdirs();
+        if (!made) {
+            LOGGER.info("make directory [{}]", homeDirectory.exists());
+        }
         user.setHomeDirectory(homeDirectory.getAbsolutePath());
         user.setEnabled(true);
         List<Authority> authorities = new ArrayList<>();
@@ -236,15 +234,6 @@ public class UserManager implements org.apache.ftpserver.ftplet.UserManager, Pas
         return false;
     }
 
-    /**
-     * SSH Authentication
-     *
-     * @param username
-     * @param password
-     * @param session
-     * @return
-     * @throws AsyncAuthException
-     */
     @Override
     public boolean authenticate(String username, PublicKey password, ServerSession session) throws AsyncAuthException {
         try {
@@ -260,7 +249,7 @@ public class UserManager implements org.apache.ftpserver.ftplet.UserManager, Pas
             for (Key key : keys) {
                 X509Certificate certificate = CertificateUtils.read(key.getCertificate());
                 PublicKey b = PublicKeyUtils.read(PublicKeyUtils.write(certificate.getPublicKey()));
-                if (key.isEnabled() && a.equals(b)) {
+                if (key.isEnabled() && a != null && a.equals(b)) {
                     String keyId = String.valueOf(key.getId());
 
                     userObject.setLastSeen(LocalDate.now().toDate());
@@ -272,11 +261,14 @@ public class UserManager implements org.apache.ftpserver.ftplet.UserManager, Pas
                     Audit.log(username + " connected " + ((InetSocketAddress) session.getClientAddress()).getHostName());
 
                     File homeDirectory = new File(configuration.getWorkspace(), userObject.getHomeDirectory());
-                    homeDirectory.mkdirs();
+                    boolean made = homeDirectory.mkdirs();
+                    if (!made) {
+                        LOGGER.info("make directory [{}]", homeDirectory.exists());
+                    }
 
                     String dek = userObject.getDek();
                     Aead dekAead = null;
-                    if (dek != null && !dek.isEmpty()) {
+                    if (dek != null && !dek.isBlank()) {
                         KeysetHandle handle = TinkProtoKeysetFormat.parseKeyset(Base64.getDecoder().decode(dek), InsecureSecretKeyAccess.get());
                         dekAead = handle.getPrimitive(RegistryConfiguration.get(), Aead.class);
                     }
@@ -293,16 +285,6 @@ public class UserManager implements org.apache.ftpserver.ftplet.UserManager, Pas
         }
     }
 
-    /**
-     * SSH Authentication
-     *
-     * @param username
-     * @param password
-     * @param session
-     * @return
-     * @throws PasswordChangeRequiredException
-     * @throws AsyncAuthException
-     */
     @Override
     public boolean authenticate(String username, String password, ServerSession session) throws PasswordChangeRequiredException, AsyncAuthException {
         try {
@@ -319,11 +301,14 @@ public class UserManager implements org.apache.ftpserver.ftplet.UserManager, Pas
                 Audit.log(username + " connected " + ((InetSocketAddress) session.getClientAddress()).getHostName());
 
                 File homeDirectory = new File(configuration.getWorkspace(), userObject.getHomeDirectory());
-                homeDirectory.mkdirs();
+                boolean made = homeDirectory.mkdirs();
+                if (!made) {
+                    LOGGER.info("make directory [{}]", homeDirectory.exists());
+                }
 
                 String dek = userObject.getDek();
                 Aead dekAead = null;
-                if (dek != null && !dek.isEmpty()) {
+                if (dek != null && !dek.isBlank()) {
                     KeysetHandle handle = TinkProtoKeysetFormat.parseKeyset(Base64.getDecoder().decode(dek), InsecureSecretKeyAccess.get());
                     dekAead = handle.getPrimitive(RegistryConfiguration.get(), Aead.class);
                 }

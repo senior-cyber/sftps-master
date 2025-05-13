@@ -177,10 +177,10 @@ public class SftpSFactory extends AbstractFactoryBean<SftpS> {
         if (ftpPort != -1 && ftpPort != 0) {
             String ftpDataPort = this.appConfig.getFtpDataPort();
             DataConnectionConfigurationFactory factory = new DataConnectionConfigurationFactory();
-            if (this.appConfig.getPassiveAddress() != null && !this.appConfig.getPassiveAddress().isEmpty()) {
+            if (this.appConfig.getPassiveAddress() != null && !this.appConfig.getPassiveAddress().isBlank()) {
                 factory.setPassiveAddress(this.appConfig.getPassiveAddress());
             }
-            if (this.appConfig.getPassiveExternalAddress() != null && !this.appConfig.getPassiveExternalAddress().isEmpty()) {
+            if (this.appConfig.getPassiveExternalAddress() != null && !this.appConfig.getPassiveExternalAddress().isBlank()) {
                 factory.setPassiveExternalAddress(this.appConfig.getPassiveExternalAddress());
             }
             factory.setPassivePorts(ftpDataPort);

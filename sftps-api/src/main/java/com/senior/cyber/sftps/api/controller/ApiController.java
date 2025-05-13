@@ -194,7 +194,7 @@ public class ApiController {
 
         String dek = userObject.getDek();
         Aead dekAead = null;
-        if (dek != null && !dek.isEmpty()) {
+        if (dek != null && !dek.isBlank()) {
             KeysetHandle handle = TinkProtoKeysetFormat.parseKeyset(Base64.getDecoder().decode(dek), InsecureSecretKeyAccess.get());
             dekAead = handle.getPrimitive(RegistryConfiguration.get(), Aead.class);
         }
@@ -202,7 +202,7 @@ public class ApiController {
         String black_secret = userObject.getSecret();
 
         String white_secret = null;
-        if (black_secret != null && !black_secret.isEmpty()) {
+        if (black_secret != null && !black_secret.isBlank()) {
             if (dekAead != null) {
                 white_secret = new String(dekAead.decrypt(Base64.getDecoder().decode(black_secret), "".getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
             } else {
@@ -370,7 +370,7 @@ public class ApiController {
             String dek = userObject.getDek();
 
             Aead dekAead = null;
-            if (dek != null && !dek.isEmpty()) {
+            if (dek != null && !dek.isBlank()) {
                 KeysetHandle handle = TinkProtoKeysetFormat.parseKeyset(Base64.getDecoder().decode(dek), InsecureSecretKeyAccess.get());
                 dekAead = handle.getPrimitive(RegistryConfiguration.get(), Aead.class);
             }
@@ -378,7 +378,7 @@ public class ApiController {
             String black_secret = userObject.getSecret();
 
             String white_secret = null;
-            if (black_secret != null && !black_secret.isEmpty()) {
+            if (black_secret != null && !black_secret.isBlank()) {
                 if (dekAead != null) {
                     white_secret = new String(dekAead.decrypt(Base64.getDecoder().decode(black_secret), "".getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
                 } else {
@@ -426,7 +426,7 @@ public class ApiController {
         if (session.getAttribute(USER_ID) == null) {
             String userId = null;
             String keyId = null;
-            if (authorization == null || authorization.isEmpty()) {
+            if (authorization == null || authorization.isBlank()) {
                 response.setHeader("WWW-Authenticate", "Basic realm=\"Authentication\"");
                 throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
             }
@@ -453,7 +453,7 @@ public class ApiController {
             String login = StringUtils.substring(login_pwd, 0, colon);
             String pwd = StringUtils.substring(login_pwd, colon + 1);
 
-            if (pwd.isEmpty() && certificate == null) {
+            if (pwd.isBlank() && certificate == null) {
                 response.setHeader("WWW-Authenticate", "Basic realm=\"Authentication\"");
                 throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
             }
@@ -473,7 +473,7 @@ public class ApiController {
 
             userId = userObject.getId();
 
-            if (!pwd.isEmpty()) {
+            if (!pwd.isBlank()) {
                 if (this.passwordEncryptor.checkPassword(pwd, userObject.getPassword())) {
                     userObject.setLastSeen(LocalDate.now().toDate());
                     userRepository.save(userObject);
@@ -484,7 +484,7 @@ public class ApiController {
             if (!authenticated && certificate != null) {
                 PublicKey a = PublicKeyUtils.read(PublicKeyUtils.write(certificate.getPublicKey()));
                 List<Key> keys = this.keyRepository.findByUser(userObject);
-                if (!keys.isEmpty()) {
+                if (!keys.isBlank()) {
                     for (Key key : keys) {
                         X509Certificate c = CertificateUtils.read(key.getCertificate());
                         PublicKey b = PublicKeyUtils.read(PublicKeyUtils.write(certificate.getPublicKey()));

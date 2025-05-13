@@ -40,7 +40,7 @@ public class WebHook {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
     public static void report(HttpClient client, UserRepository userRepository, Log log, User user, String keyId, String keyName) {
-        if (user.isWebhookEnabled() && user.getWebhookUrl() != null && !"".equals(user.getWebhookUrl())) {
+        if (user.isWebhookEnabled() && user.getWebhookUrl() != null && !user.getWebhookUrl().isBlank()) {
             Map<String, Object> gson = new HashMap<>();
             gson.put("when", DateFormatUtils.ISO_8601_EXTENDED_DATETIME_TIME_ZONE_FORMAT.format(log.getCreatedAt()));
             gson.put("userId", user.getId());
@@ -50,7 +50,7 @@ public class WebHook {
                 gson.put("keyName", keyName);
             }
             gson.put("srcPath", log.getSrcPath());
-            if (log.getDstPath() != null && !"".equals(log.getDstPath())) {
+            if (log.getDstPath() != null && !log.getDstPath().isBlank()) {
                 gson.put("dstPath", log.getDstPath());
             }
             if (log.getSize() != null) {
@@ -62,11 +62,11 @@ public class WebHook {
             Aead aeadDek = null;
             try {
                 String dek = user.getDek();
-                if (dek != null && !dek.isEmpty()) {
+                if (dek != null && !dek.isBlank()) {
                     KeysetHandle handle = TinkProtoKeysetFormat.parseKeyset(Base64.getDecoder().decode(dek), InsecureSecretKeyAccess.get());
                     aeadDek = handle.getPrimitive(RegistryConfiguration.get(), Aead.class);
                 }
-            } catch (GeneralSecurityException e) {
+            } catch (GeneralSecurityException ignored) {
             }
 
             String secret_value = null;
@@ -87,7 +87,7 @@ public class WebHook {
                     SecretKeySpec secretKeySpec = new SecretKeySpec(Base64.getDecoder().decode(secret_value), "AES");
                     SecretKeyFactory factory = SecretKeyFactory.getInstance("AES", BouncyCastleProvider.PROVIDER_NAME);
                     secret = factory.generateSecret(secretKeySpec);
-                } catch (InvalidKeySpecException | NoSuchAlgorithmException | NoSuchProviderException e) {
+                } catch (InvalidKeySpecException | NoSuchAlgorithmException | NoSuchProviderException ignored) {
                 }
             }
 
@@ -97,12 +97,12 @@ public class WebHook {
                     Mac hmac = Mac.getInstance("HmacSHA256", BouncyCastleProvider.PROVIDER_NAME);
                     hmac.init(secret);
                     signature = Base64.getEncoder().encodeToString(hmac.doFinal(json.getBytes(StandardCharsets.UTF_8)));
-                } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidKeyException e) {
+                } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidKeyException ignored) {
                 }
             }
 
             var requestBuilder = HttpRequest.newBuilder();
-            if (signature == null || "".equals(signature)) {
+            if (signature == null || signature.isBlank()) {
                 LOGGER.info("X-SftpS-Event [{}]", log.getEventType());
                 requestBuilder.header("X-SftpS-Event", log.getEventType().name());
             } else {
@@ -115,8 +115,8 @@ public class WebHook {
             requestBuilder.uri(URI.create(user.getWebhookUrl()));
             var request = requestBuilder.build();
             try {
-                HttpResponse<Void> response = client.send(request, HttpResponse.BodyHandlers.discarding());
-            } catch (IOException | InterruptedException e) {
+                client.send(request, HttpResponse.BodyHandlers.discarding());
+            } catch (IOException | InterruptedException ignored) {
             }
         }
     }
