@@ -22,11 +22,14 @@ import org.apache.ftpserver.ssl.ClientAuth;
 import org.apache.ftpserver.ssl.SslConfiguration;
 import org.apache.ftpserver.ssl.SslConfigurationFactory;
 import org.apache.sshd.common.config.keys.KeyUtils;
+import org.apache.sshd.common.file.root.RootedDirectoryStream;
 import org.apache.sshd.scp.server.ScpCommandFactory;
 import org.apache.sshd.server.SshServer;
 import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
 import org.apache.sshd.server.shell.InteractiveProcessShellFactory;
 import org.apache.sshd.sftp.client.impl.DefaultSftpClientFactory;
+import org.apache.sshd.sftp.server.SftpSubsystemFactory;
+import org.apache.sshd.sftp.server.UnsupportedAttributePolicy;
 import org.jasypt.util.password.PasswordEncryptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -215,8 +218,10 @@ public class SftpSFactory extends AbstractFactoryBean<SftpS> {
             sshd.setPasswordAuthenticator(userManager);
             sshd.setPublickeyAuthenticator(userManager);
 
-            SftpSSubsystemFactory sftp = new SftpSSubsystemFactory();
-            sshd.setSubsystemFactories(Collections.singletonList(sftp));
+            SftpSubsystemFactory.Builder builder = new SftpSubsystemFactory.Builder();
+            builder.withUnsupportedAttributePolicy(UnsupportedAttributePolicy.Warn);
+            SftpSubsystemFactory sftp = builder.build();
+            sshd.setSubsystemFactories(Collections.singletonList(new SftpSSubsystemFactory(sftp)));
             sftp.addSftpEventListener(new SftpSEventListenerAdapter(this.logRepository, this.client, this.userRepository));
 
             /**

@@ -86,4 +86,3 @@ logging:
     console: UTF-8
   level:
     root: INFO
-    org.springframework.security: DEBUG
