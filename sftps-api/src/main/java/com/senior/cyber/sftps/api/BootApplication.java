@@ -1,7 +1,6 @@
 package com.senior.cyber.sftps.api;
 
-import com.google.crypto.tink.aead.AeadConfig;
-import com.google.crypto.tink.streamingaead.StreamingAeadConfig;
+import com.google.crypto.tink.config.TinkConfig;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.senior.cyber.sftps.api.factory.SftpSFactory;
@@ -38,8 +37,7 @@ public class BootApplication implements CommandLineRunner, ApplicationContextAwa
     }
 
     public static void main(String[] args) throws Exception {
-        AeadConfig.register();
-        StreamingAeadConfig.register();
+        TinkConfig.register();
         SpringApplication.run(BootApplication.class, args);
     }
 
@@ -50,6 +48,20 @@ public class BootApplication implements CommandLineRunner, ApplicationContextAwa
 
     @Override
     public void run(String... args) throws Exception {
+//        PasswordEncryptor passwordEncryptor = this.applicationContext.getBean(PasswordEncryptor.class);
+//        UserRepository userRepository = this.applicationContext.getBean(UserRepository.class);
+//        User user = new User();
+//        user.setDisplayName("Socheat KHAUV");
+//        user.setHomeDirectory("C:/Users/User/Downloads");
+//        user.setEnabled(true);
+//        user.setAdmin(false);
+//        user.setEncryptAtRest(false);
+//        user.setWebhookEnabled(false);
+//        user.setLastSeen(new Date());
+//        user.setEmailAddress("k.socheat@dgc.gov.kh");
+//        user.setLogin("k.socheat");
+//        user.setPassword(passwordEncryptor.encryptPassword("123123a"));
+//        userRepository.save(user);
     }
 
     @Bean

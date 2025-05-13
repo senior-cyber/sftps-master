@@ -484,11 +484,11 @@ public class ApiController {
             if (!authenticated && certificate != null) {
                 PublicKey a = PublicKeyUtils.read(PublicKeyUtils.write(certificate.getPublicKey()));
                 List<Key> keys = this.keyRepository.findByUser(userObject);
-                if (!keys.isBlank()) {
+                if (!keys.isEmpty()) {
                     for (Key key : keys) {
                         X509Certificate c = CertificateUtils.read(key.getCertificate());
                         PublicKey b = PublicKeyUtils.read(PublicKeyUtils.write(certificate.getPublicKey()));
-                        if (key.isEnabled() && a.equals(b)) {
+                        if (key.isEnabled() && a != null && a.equals(b)) {
                             keyId = key.getId();
 
                             userObject.setLastSeen(LocalDate.now().toDate());

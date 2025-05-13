@@ -3,12 +3,16 @@ package com.senior.cyber.sftps.api.scp;
 import com.senior.cyber.sftps.api.configuration.AppConfig;
 import com.senior.cyber.sftps.dao.entity.rbac.User;
 import com.senior.cyber.sftps.dao.repository.rbac.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 
 public class SftpSVirtualFileSystemFactory extends org.apache.sshd.common.file.virtualfs.VirtualFileSystemFactory {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SftpSVirtualFileSystemFactory.class);
 
     private final UserRepository userRepository;
 
@@ -26,7 +30,10 @@ public class SftpSVirtualFileSystemFactory extends org.apache.sshd.common.file.v
             throw new IllegalArgumentException(userName);
         }
         File homeDirectory = new File(this.configuration.getWorkspace(), user.getHomeDirectory());
-        homeDirectory.mkdirs();
+        boolean made = homeDirectory.mkdirs();
+        if (!made) {
+            LOGGER.info("Created home directory: " + homeDirectory.exists());
+        }
         return FileSystems.getDefault().getPath(homeDirectory.getAbsolutePath());
     }
 

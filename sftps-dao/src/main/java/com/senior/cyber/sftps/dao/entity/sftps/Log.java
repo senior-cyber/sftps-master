@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -16,7 +17,7 @@ import java.util.Date;
 public class Log implements Serializable {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @UuidGenerator
     @Setter(AccessLevel.NONE)
     @Column(name = "log_id")
     private String id;

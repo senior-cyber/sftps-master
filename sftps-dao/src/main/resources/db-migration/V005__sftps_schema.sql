@@ -17,8 +17,9 @@ CREATE TABLE tbl_log
 (
     log_id            VARCHAR(36)  NOT NULL,
     user_display_name VARCHAR(200) NOT NULL,
-    key_name          VARCHAR(200) NOT NULL,
+    key_name          VARCHAR(200) NULL,
     size              BIGINT NULL,
+    event_type        VARCHAR(10)  NULL,
     src_path          VARCHAR(255) NULL,
     dst_path          VARCHAR(255) NULL,
     created_at        DATETIME NULL,

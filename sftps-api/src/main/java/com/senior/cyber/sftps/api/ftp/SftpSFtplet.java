@@ -49,7 +49,10 @@ public class SftpSFtplet extends DefaultFtplet {
     public FtpletResult onLogin(FtpSession session, FtpRequest request) throws FtpException, IOException {
         Audit.log(session.getUser().getName() + " connected " + session.getClientAddress().getHostName());
         File home = new File(session.getUser().getHomeDirectory());
-        home.mkdirs();
+        boolean made = home.mkdirs();
+        if (!made) {
+            LOGGER.info("Created home directory: " + home.exists());
+        }
         return FtpletResult.DEFAULT;
     }
 

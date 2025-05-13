@@ -12,7 +12,7 @@ app:
   ftps-port: 7990
   ftps-data-port: 7000-7500
   sftp-port: 7022
-  workspace: /tmp
+  workspace: 'C:/Users/User/Downloads/sftps'
   client-auth: optional
   trust-store: classpath:ca.jks
   trust-store-type: JKS
@@ -54,7 +54,7 @@ spring:
     open-in-view: false
     properties:
       hibernate:
-        generate_statistics: true
+        generate_statistics: false
         format_sql: true
   mvc:
     servlet:

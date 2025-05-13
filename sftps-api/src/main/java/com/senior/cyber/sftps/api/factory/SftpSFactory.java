@@ -26,6 +26,7 @@ import org.apache.sshd.scp.server.ScpCommandFactory;
 import org.apache.sshd.server.SshServer;
 import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
 import org.apache.sshd.server.shell.InteractiveProcessShellFactory;
+import org.apache.sshd.sftp.client.impl.DefaultSftpClientFactory;
 import org.jasypt.util.password.PasswordEncryptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -102,7 +103,7 @@ public class SftpSFactory extends AbstractFactoryBean<SftpS> {
             }
 
             String keyAlias = this.appConfig.getKeyAlias();
-            if (keyAlias != null && !"".equals(keyAlias)) {
+            if (keyAlias != null && !keyAlias.isBlank()) {
                 factory.setKeyAlias(keyAlias);
             }
 
@@ -151,10 +152,10 @@ public class SftpSFactory extends AbstractFactoryBean<SftpS> {
                 String ftpsDataPort = this.appConfig.getFtpsDataPort();
                 DataConnectionConfigurationFactory factory = new DataConnectionConfigurationFactory();
                 factory.setPassivePorts(ftpsDataPort);
-                if (this.appConfig.getPassiveAddress() != null && !"".equals(this.appConfig.getPassiveAddress())) {
+                if (this.appConfig.getPassiveAddress() != null && !this.appConfig.getPassiveAddress().isBlank()) {
                     factory.setPassiveAddress(this.appConfig.getPassiveAddress());
                 }
-                if (this.appConfig.getPassiveExternalAddress() != null && !"".equals(this.appConfig.getPassiveExternalAddress())) {
+                if (this.appConfig.getPassiveExternalAddress() != null && !this.appConfig.getPassiveExternalAddress().isBlank()) {
                     factory.setPassiveExternalAddress(this.appConfig.getPassiveExternalAddress());
                 }
                 factory.setPassiveIpCheck(true);
@@ -225,7 +226,6 @@ public class SftpSFactory extends AbstractFactoryBean<SftpS> {
             commandFactory.setScpFileOpener(new ScpFileOpener());
             sshd.setCommandFactory(commandFactory);
             sshd.setShellFactory(new InteractiveProcessShellFactory());
-
             sshd.setPort(sftpPort);
             sshd.start();
             logs.add("          sftp port [" + sftpPort + "]");
