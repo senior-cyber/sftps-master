@@ -1,10 +1,17 @@
 server:
+  port: 6020
   ssl:
     enabled: true
     certificate: classpath:fullchain.pem
     certificate-private-key: classpath:privkey.pem
     trust-certificate: classpath:ca.pem
     client-auth: WANT
+  error:
+    include-message: always
+    include-path: always
+    include-binding-errors: never
+    include-exception: false
+    include-stacktrace: never
 
 app:
   ftp-port: 6021
@@ -12,7 +19,7 @@ app:
   ftps-port: 7990
   ftps-data-port: 7000-7500
   sftp-port: 7022
-  workspace: 'C:/Users/User/Downloads/sftps'
+  workspace: '/opt/apps/sftps-master/sftps-data'
   client-auth: optional
   trust-store: classpath:ca.jks
   trust-store-type: JKS
@@ -37,7 +44,7 @@ spring:
       enabled: true
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:mysql://192.168.1.53:33063/sftps
+    url: jdbc:mysql://127.0.0.1:33063/sftps
     username: root
     password: 123123a
   jackson:
@@ -82,7 +89,10 @@ spring:
       static-locations: classpath:/META-INF/web-resources/, classpath:/META-INF/resources/, classpath:/resources/, classpath:/static/, classpath:/public/
 
 logging:
-  charset:
-    console: UTF-8
+  file:
+    path: ./
+    name: info.log
   level:
-    root: INFO
+    root: info
+    sql: info
+    web: info

@@ -56,6 +56,6 @@ dependencies {
 }
 
 bootJar {
-    archiveBaseName = "sftps-api"
+    archiveFileName = "sftps-api.jar"
     archiveVersion = ""
 }

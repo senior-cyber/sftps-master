@@ -1,10 +1,10 @@
 services:
   mysql-sftps:
-    container_name: sftps
-    image: docker.io/bitnami/mysql:9.0
+    container_name: mysql-sftps
+    image: docker.io/bitnami/mysql:9.4.0
     restart: 'always'
     ports:
-      - '33063:3306'
+      - '127.0.0.1:33063:3306'
     volumes:
       - 'mysql-sftps:/bitnami/mysql/data'
     environment:
